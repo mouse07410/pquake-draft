@@ -8,20 +8,20 @@ submissiontype: IETF  # also: "independent", "IAB", or "IRTF"
 number: 01
 consensus: true
 v: 3
-area: Security
-workgroup: "Limited Additional Mechanisms for PKIX and SMIME"
+area: ""
+workgroup: "Lightweight Authenticated Key Exchange"
 keyword:
  - Post-Quantum
  - Key Exchange
  - Compact
  - Authenticated
 venue:
-  group: LAKE
-  type: Working Group
-  mail: lake@ietf.org
-  arch: https://mailarchive.ietf.org/arch/browse/lake/
-  github: mouse07410/pquake-draft
-  latest: https://mouse07410.github.io/pquake-draft/draft-uri-lake-pquake-latest.html
+  group: "Lightweight Authenticated Key Exchange"
+  type: ""
+  mail: "lake@ietf.org"
+  arch: "https://mailarchive.ietf.org/arch/browse/lake/"
+  github: "mouse07410/pquake-draft"
+  latest: "https://mouse07410.github.io/pquake-draft/draft-uri-lake-pquake.html"
 
 author:
 -
