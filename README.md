@@ -1,13 +1,31 @@
-# Internet-Draft Template Repository
+[![Update Editor's Copy](https://github.com/mouse07410/pquake-draft/actions/workflows/ghpages.yml/badge.svg)](https://github.com/mouse07410/pquake-draft/actions/workflows/ghpages.yml)
 
-Use this repository as a template if you want to start working on
-[IETF](https://www.ietf.org/) documents. [Click here to create a new repository using the
-template](https://github.com/martinthomson/internet-draft-template/generate).
-Make sure to check "Include all branches", or you will need to enable GitHub Pages manually.
+# PQuAKE - Post-Quantum Authenticated Key Exchange
 
-[Read the
-instructions](https://github.com/martinthomson/i-d-template/blob/main/doc/TEMPLATE.md)
-for more information.
+This is the working area for the individual Internet-Draft, "PQuAKE - Post-Quantum Authenticated Key Exchange".
 
-Once you have created your own repository, start work by
-[renaming the `draft-todo-yourname-protocol.md` file](../../edit/main/draft-todo-yourname-protocol.md).
+* [Editor's Copy](https://mouse07410.github.io/pquake-draft/#go.draft-uri-lake-pquake.html)
+* [Datatracker Page](https://datatracker.ietf.org/doc/draft-uri-lake-pquake)
+* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-uri-lake-pquake)
+* [Compare Editor's Copy to Individual Draft](https://mouse07410.github.io/pquake-draft/#go.draft-uri-lake-pquake.diff)
+
+
+## Contributing
+
+See the
+[guidelines for contributions](https://github.com/mouse07410/pquake-draft/blob/main/CONTRIBUTING.md).
+
+Contributions can be made by creating pull requests.
+The GitHub interface supports creating pull requests using the Edit (✏) button.
+
+
+## Command Line Usage
+
+Formatted text and HTML versions of the draft can be built using `make`.
+
+```sh
+$ make
+```
+
+Command line usage requires that you have the necessary software installed.  See
+[the instructions](https://github.com/martinthomson/i-d-template/blob/main/doc/SETUP.md).
