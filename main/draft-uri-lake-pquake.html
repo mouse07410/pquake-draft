@@ -1,0 +1,2186 @@
+<!DOCTYPE html>
+<html lang="en" class="RFC">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>RFC 1: PQuAKE - Post-Quantum Authenticated Key Exchange</title>
+<meta content="Uri Blumenthal" name="author">
+<meta content="Brandon Luo" name="author">
+<meta content="Sean O'Melia" name="author">
+<meta content="Gabriel Torres" name="author">
+<meta content="David A. Wilson" name="author">
+<meta content="
+       This document defines the Post-Quantum Authenticated Key Exchange (PQuAKE)
+protocol that addresses the needs of bandwidth- and/or power-constrained
+environments, while maintaining strong security guarantees.
+It accomplishes that by minimizing
+the number of bits that need to be exchanged and
+by utilizing an implicit peer authentication approach
+similar to Menezes-Qu-Vanstone (MQV) design.
+This protocol is suitable for
+integration into protocols that establish dynamic
+secure sessions, such as Extensible Authentication Protocol (EAP),
+Internet Key Exchange Version 2 (IKEv2),
+or Secure COmmunications Interoperability Protocol (SCIP).
+This protocol has proofs in the verifiers Verifpal and CryptoVerif for
+security properties such as secrecy of the session
+key, mutual authentication, identity hiding with a preshared secret, and forward
+secrecy of the session key.
+The authors are in the process of publishing the proofs. 
+    " name="description">
+<meta content="xml2rfc 3.28.1" name="generator">
+<meta content="Post-Quantum" name="keyword">
+<meta content="Key Exchange" name="keyword">
+<meta content="Compact" name="keyword">
+<meta content="Authenticated" name="keyword">
+<meta content="1" name="rfc.number">
+<!-- Generator version information:
+  xml2rfc 3.28.1
+    Python 3.12.10
+    ConfigArgParse 1.7
+    google-i18n-address 3.1.1
+    intervaltree 3.1.0
+    Jinja2 3.1.6
+    lxml 5.3.0
+    platformdirs 4.3.7
+    pycountry 24.6.1
+    PyYAML 6.0.2
+    requests 2.32.3
+    setuptools 70.3.0
+    wcwidth 0.2.13
+-->
+<link href="draft-uri-lake-pquake.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1#title {
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1#title, h1#rfcnum {
+  margin: 1.5em 0 0.2em;
+}
+h1#rfcnum + h1#title {
+  margin: 0.2em 0;
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+}
+#abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 16px;
+  line-height: 0;
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+/* font-family isn't space-separated, but =~ will have to do */
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+    }
+  }
+  &.olPercent > dt {
+    float: none;
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+}
+dl:not(.dlNewline) > dt {
+  float: left;
+  margin-right: 2ch;
+  min-width: 8ch;
+}
+dl > dd {
+  margin-bottom: .8em;
+  margin-left: var(--indent) !important; /* stupid element overrides */
+  min-height: 2ex;
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href].selfRef, .iref + a[href].internal {
+  color: var(--text-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) p {
+    margin: -2px 0;
+    max-height: 0;
+    transition: max-height 2s ease, margin 0.5s ease 0.5s;
+    overflow: hidden;
+  }
+  :is(#status-of-memo, #copyright):hover p,
+  :is(#status-of-memo, #copyright) h2:target ~ p {
+    margin: 0.5em 0;
+    max-height: 500px;
+    overflow: auto;
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+table.left {
+  margin-right: auto;
+}
+table .text-left {
+  text-align: left;
+}
+table .text-center {
+  text-align: center;
+}
+table .text-right {
+  text-align: right;
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+table caption {
+  margin: 0;
+  padding: 3px 0 3px 1em;
+}
+table p {
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+}
+@media not print {
+  :hover > a.pilcrow {
+    opacity: 1;
+  }
+  a.pilcrow[href]:hover {
+    color: var(--pilcrow-strong);
+    background-color: transparent;
+  }
+}
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses > section {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #authors-addresses > section > h2 {
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+    break-inside: avoid-column;
+  }
+}
+
+/* Comments */
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc nav {
+    font-family: var(--font-title);
+    font-weight: 360;
+    & > ul { margin-bottom: 2em; }
+    & ul {
+      margin: 0 0 0 4px;
+      & :is(p, li) {
+        margin: 2px 0;
+      }
+    }
+  }
+  #toc a.toplink {
+    float: right;
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+    &::before { /* css hamburger */
+      float: right;
+      position: relative;
+      width: 1em;
+      height: 1px;
+      left: -164px;
+      margin: 8px 0 0 0;
+      background: white none repeat scroll 0 0;
+      box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+      content: "";
+    }
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active {
+    opacity: 1;
+    & nav { display: block; }
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:is(:link, :focus, :hover),
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin: 2px 0.5em 0;
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+  #toc a.toplink {
+    margin: 8px 0.5em 0;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg :is([stroke="black"], [stroke^="#000"]) {
+  stroke: var(--text-color);
+}
+svg :is([stroke="white"], [stroke^="#fff"]) {
+  stroke: var(--background-color);
+}
+svg :is([fill="black"], [fill^="#000"], :not([fill])) {
+  fill: var(--text-color);
+}
+svg :is([fill="white"], [fill^="#fff"]) {
+  fill: var(--background-color);
+}
+</style>
+
+<link href="https://dx.doi.org/10.17487/rfc1" rel="alternate">
+  <link href="urn:issn:2070-1721" rel="alternate">
+  <link href="https://datatracker.ietf.org/doc/draft-uri-lake-pquake-latest" rel="prev">
+  </head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">RFC 1</td>
+<td class="center">PQuAKE</td>
+<td class="right">April 2025</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Blumenthal, et al.</td>
+<td class="center">Informational</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-stream">Stream:</dt>
+<dd class="stream">Internet Engineering Task Force (IETF)</dd>
+<dt class="label-rfc">RFC:</dt>
+<dd class="rfc"><a href="https://www.rfc-editor.org/rfc/rfc1" class="eref">1</a></dd>
+<dt class="label-category">Category:</dt>
+<dd class="category">Informational</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2025-04-18" class="published">18 April 2025</time>
+    </dd>
+<dt class="label-issn">ISSN:</dt>
+<dd class="issn">2070-1721</dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">U. Blumenthal</div>
+<div class="org">MIT</div>
+</div>
+<div class="author">
+      <div class="author-name">B. Luo</div>
+<div class="org">MIT</div>
+</div>
+<div class="author">
+      <div class="author-name">S. O'Melia</div>
+<div class="org">MIT</div>
+</div>
+<div class="author">
+      <div class="author-name">G. Torres</div>
+<div class="org">MIT</div>
+</div>
+<div class="author">
+      <div class="author-name">D. Wilson</div>
+<div class="org">MIT</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="rfcnum">RFC 1</h1>
+<h1 id="title">PQuAKE - Post-Quantum Authenticated Key Exchange</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document defines the Post-Quantum Authenticated Key Exchange (PQuAKE)
+protocol that addresses the needs of bandwidth- and/or power-constrained
+environments, while maintaining strong security guarantees.
+It accomplishes that by minimizing
+the number of bits that need to be exchanged and
+by utilizing an implicit peer authentication approach
+similar to Menezes-Qu-Vanstone (MQV) design.
+This protocol is suitable for
+integration into protocols that establish dynamic
+secure sessions, such as Extensible Authentication Protocol (EAP),
+Internet Key Exchange Version 2 (IKEv2),
+or Secure COmmunications Interoperability Protocol (SCIP).
+This protocol has proofs in the verifiers Verifpal and CryptoVerif for
+security properties such as secrecy of the session
+key, mutual authentication, identity hiding with a preshared secret, and forward
+secrecy of the session key.
+The authors are in the process of publishing the proofs.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+            This document is not an Internet Standards Track specification; it is
+            published for informational purposes.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+            This document is a product of the Internet Engineering Task Force
+            (IETF).  It represents the consensus of the IETF community.  It has
+            received public review and has been approved for publication by the
+            Internet Engineering Steering Group (IESG).  Not all documents
+            approved by the IESG are candidates for any level of Internet
+            Standard; see Section 2 of RFC 7841.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+            Information about the current status of this document, any
+            errata, and how to provide feedback on it may be obtained at
+            <span><a href="https://www.rfc-editor.org/info/rfc1">https://www.rfc-editor.org/info/rfc1</a></span>.<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2025 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-compliance-requirements-for" class="internal xref">Compliance requirements for the components</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.2">
+                <p id="section-toc.1-1.1.2.2.1" class="keepWithNext"><a href="#section-1.2" class="auto internal xref">1.2</a>.  <a href="#name-mandatory-to-implement-algo" class="internal xref">Mandatory-To-Implement algorithms</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-protocol-description" class="internal xref">Protocol Description</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-protocol-diagram" class="internal xref">Protocol Diagram</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-exchange-certificates" class="internal xref">Exchange certificates</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.1">
+                    <p id="section-toc.1-1.3.2.2.2.1.1"><a href="#section-3.2.1" class="auto internal xref">3.2.1</a>.  <a href="#name-key-derivation-of-k_hid-wit" class="internal xref">Key Derivation of k_hid with preshared secret</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.2">
+                    <p id="section-toc.1-1.3.2.2.2.2.1"><a href="#section-3.2.2" class="auto internal xref">3.2.2</a>.  <a href="#name-key-derivation-of-k_hid-with" class="internal xref">Key Derivation of k_hid without preshared secret</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.3">
+                    <p id="section-toc.1-1.3.2.2.2.3.1"><a href="#section-3.2.3" class="auto internal xref">3.2.3</a>.  <a href="#name-initiator" class="internal xref">Initiator</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2.2.4">
+                    <p id="section-toc.1-1.3.2.2.2.4.1"><a href="#section-3.2.4" class="auto internal xref">3.2.4</a>.  <a href="#name-responder" class="internal xref">Responder</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="auto internal xref">3.3</a>.  <a href="#name-encapsulate-shared-secrets" class="internal xref">Encapsulate shared secrets</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3.2.1">
+                    <p id="section-toc.1-1.3.2.3.2.1.1"><a href="#section-3.3.1" class="auto internal xref">3.3.1</a>.  <a href="#name-initiator-2" class="internal xref">Initiator</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3.2.2">
+                    <p id="section-toc.1-1.3.2.3.2.2.1"><a href="#section-3.3.2" class="auto internal xref">3.3.2</a>.  <a href="#name-responder-2" class="internal xref">Responder</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.4">
+                <p id="section-toc.1-1.3.2.4.1"><a href="#section-3.4" class="auto internal xref">3.4</a>.  <a href="#name-decapsulate-ciphertexts-and" class="internal xref">Decapsulate ciphertexts and key derivation</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.4.2.1">
+                    <p id="section-toc.1-1.3.2.4.2.1.1"><a href="#section-3.4.1" class="auto internal xref">3.4.1</a>.  <a href="#name-initiator-3" class="internal xref">Initiator</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.4.2.2">
+                    <p id="section-toc.1-1.3.2.4.2.2.1"><a href="#section-3.4.2" class="auto internal xref">3.4.2</a>.  <a href="#name-responder-3" class="internal xref">Responder</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.5">
+                <p id="section-toc.1-1.3.2.5.1"><a href="#section-3.5" class="auto internal xref">3.5</a>.  <a href="#name-key-confirmation" class="internal xref">Key Confirmation</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.5.2.1">
+                    <p id="section-toc.1-1.3.2.5.2.1.1"><a href="#section-3.5.1" class="auto internal xref">3.5.1</a>.  <a href="#name-initiator-4" class="internal xref">Initiator</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.5.2.2">
+                    <p id="section-toc.1-1.3.2.5.2.2.1"><a href="#section-3.5.2" class="auto internal xref">3.5.2</a>.  <a href="#name-responder-4" class="internal xref">Responder</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.6">
+                <p id="section-toc.1-1.3.2.6.1"><a href="#section-3.6" class="auto internal xref">3.6</a>.  <a href="#name-error-handling" class="internal xref">Error Handling</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-protocol-messages" class="internal xref">Protocol Messages</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-message-format" class="internal xref">Message Format</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-hello-messages" class="internal xref">Hello Messages</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.1">
+                    <p id="section-toc.1-1.4.2.2.2.1.1"><a href="#section-4.2.1" class="auto internal xref">4.2.1</a>.  <a href="#name-initiator-hello" class="internal xref">Initiator Hello</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.2">
+                    <p id="section-toc.1-1.4.2.2.2.2.1"><a href="#section-4.2.2" class="auto internal xref">4.2.2</a>.  <a href="#name-responder-hello" class="internal xref">Responder Hello</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-certificate-exchange" class="internal xref">Certificate Exchange</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4">
+                <p id="section-toc.1-1.4.2.4.1"><a href="#section-4.4" class="auto internal xref">4.4</a>.  <a href="#name-certificate-format" class="internal xref">Certificate Format</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.5">
+                <p id="section-toc.1-1.4.2.5.1"><a href="#section-4.5" class="auto internal xref">4.5</a>.  <a href="#name-encapsulation" class="internal xref">Encapsulation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.6">
+                <p id="section-toc.1-1.4.2.6.1"><a href="#section-4.6" class="auto internal xref">4.6</a>.  <a href="#name-key-confirmation-2" class="internal xref">Key Confirmation</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-integration-into-ikev2" class="internal xref">Integration into IKEv2</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-ike_sa_init" class="internal xref">IKE_SA_INIT</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-ike_intermediate" class="internal xref">IKE_INTERMEDIATE</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-ike_auth" class="internal xref">IKE_AUTH</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
+                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2">
+                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="auto internal xref">8.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">The primary goal of PQuAKE is to minimize the communication overhead of
+Post-Quantum (PQ) public-key cryptography during a key exchange.
+Bandwidth or power limited devices may not realistically use
+alternative PQ key exchanges
+such as the TLS handshake protocol to derive
+a shared symmetric key,
+as PQ digital signatures and keys are drastically larger.
+This protocol minimizes the communication overhead
+by reducing the number of signatures transmitted
+by each party to one offline-generated certificate
+signature. It is designed to be an add-on to such
+protocols as EAP <span>[<a href="#EAP" class="cite xref">EAP</a>]</span>, IKEv2, and others.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">Both parties <span class="bcp14">MAY</span> have a pre-shared symmetric secret key, usually
+distributed among all the members of the given network or
+Community of Interest (COI).
+Adding a pre-shared symmetric key to the key derivation ensures
+confidentiality of the peers' identities (certificates) against
+active attackers that do not have that pre-shared key.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">The protocol maintains the following security guarantees:<a href="#section-1-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1-4.1">
+          <p id="section-1-4.1.1">The secure channel between the Initiator and Responder is mutually authenticated<a href="#section-1-4.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-4.2">
+          <p id="section-1-4.2.1">Key freshness, aka a new key is generated for this channel, and it hasn't
+  been reused or stale;<a href="#section-1-4.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-4.3">
+          <p id="section-1-4.3.1">If two parties properly follow the protocol,
+  both parties will compute the same shared keys that are known only to them;<a href="#section-1-4.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-4.4">
+          <p id="section-1-4.4.1">Perfect Forward Secrecy, aka after the channel is closed, there is no way
+  for an adversary to break security properties associated with the shared
+  key established via this protocol;<a href="#section-1-4.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-4.5">
+          <p id="section-1-4.5.1">Security against replay attacks;<a href="#section-1-4.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-4.6">
+          <p id="section-1-4.6.1">Confidentiality of peers' identities against passive adversary;<a href="#section-1-4.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-1-4.7">
+          <p id="section-1-4.7.1">Confidentiality of peers' identities against active adversary (aka, Man-In-The-Middle)
+  when both peers utilize long-term pre-shared key.<a href="#section-1-4.7.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-1-5">This protocol has proofs in the verifiers Verifpal and CryptoVerif for
+security properties such as secrecy of the session
+key, mutual authentication, identity hiding with a preshared secret, and forward
+secrecy of the session key.
+The authors are in the process of publishing the proofs.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-6">It is important to note that PQuAKE does not replace protocols like
+the TLS record protocol, only the handshake protocol.
+Other protocols such as IKEv2, SCIP, or EAP may integrate PQuAKE
+into their key exchange phase.<a href="#section-1-6" class="pilcrow">¶</a></p>
+<div id="compliance-requirements-for-the-components">
+<section id="section-1.1">
+        <h3 id="name-compliance-requirements-for">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-compliance-requirements-for" class="section-name selfRef">Compliance requirements for the components</a>
+        </h3>
+<p id="section-1.1-1">The building blocks of this protocol <span class="bcp14">SHALL</span> have the
+following security properties:<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.1-2.1">
+            <p id="section-1.1-2.1.1">Symmetric Key Cryptosystem - IND-CCA2<a href="#section-1.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-2.2">
+            <p id="section-1.1-2.2.1">Key Encapsulation Mechanism (KEM) - Implicit, IND-CCA2 and IK-CCA2<a href="#section-1.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-2.3">
+            <p id="section-1.1-2.3.1">Key Derivation Function 1 - Random Oracle Hash Function<a href="#section-1.1-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-2.4">
+            <p id="section-1.1-2.4.1">Key Derivation Function 2 - Random Oracle Hash Function<a href="#section-1.1-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-2.5">
+            <p id="section-1.1-2.5.1">Message Authentication Code (MAC) - Pseudorandom Function<a href="#section-1.1-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="mandatory-to-implement-algorithms">
+<section id="section-1.2">
+        <h3 id="name-mandatory-to-implement-algo">
+<a href="#section-1.2" class="section-number selfRef">1.2. </a><a href="#name-mandatory-to-implement-algo" class="section-name selfRef">Mandatory-To-Implement algorithms</a>
+        </h3>
+<p id="section-1.2-1">While this protocol has been formally proven to work with any
+KEM, MAC, and symmetric cipher that exhibit the above
+properties -- interoperability
+requires that a Mandatory-To-Implement (MTI) set of algorithms
+is specified for the Version 1 of the protocol:<a href="#section-1.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.2-2.1">
+            <p id="section-1.2-2.1.1">Enc: AES-GCM-256<a href="#section-1.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.2-2.2">
+            <p id="section-1.2-2.2.1">KEM: ML-KEM-1024<a href="#section-1.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.2-2.3">
+            <p id="section-1.2-2.3.1">Hash: SHA384<a href="#section-1.2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.2-2.4">
+            <p id="section-1.2-2.4.1">MAC: HMAC<a href="#section-1.2-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.2-2.5">
+            <p id="section-1.2-2.5.1">KDF: HKDF<a href="#section-1.2-2.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.2-2.6">
+            <p id="section-1.2-2.6.1">Signature: ML-DSA-87<a href="#section-1.2-2.6.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="conventions-and-definitions">
+<section id="section-2">
+      <h2 id="name-conventions-and-definitions">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
+      </h2>
+<p id="section-2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="protocol-description">
+<section id="section-3">
+      <h2 id="name-protocol-description">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-protocol-description" class="section-name selfRef">Protocol Description</a>
+      </h2>
+<p id="section-3-1">The PQuAKE protocol consists of four steps. Within each step, the exchanges
+can happen asynchronously, but one step (aka, all of the exchanges of
+that step) <span class="bcp14">MUST</span> conclude before the peers
+can proceed to the next one.
+If any step results in an error, the protocol <span class="bcp14">SHOULD</span> abort.
+That includes receiving an out-of-order or corrupted message,
+or not receiving an expected message within the
+deployer-configured time interval. However, the protocol <span class="bcp14">SHOULD</span> only abort
+at the end of the protocol if the peer's identity does not match an out-of-band
+verification, and an implicit KEM without aborts <span class="bcp14">SHOULD</span> be used. Ideally, the
+protocol <span class="bcp14">SHOULD</span> only abort after the key confirmation step if the reason for aborting
+is related to the identities of the two parties.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">Currently, no notification to the other party, such as
+information about an abnormal completion and/or giving
+details of the error, is included in the protocol.<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-3">The four steps are the following:<a href="#section-3-3" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-3-4">
+<li id="section-3-4.1">
+          <p id="section-3-4.1.1">Establish an ephemeral symmetric key via hello messages and
+exchange encrypted certificates (one <span class="bcp14">MUST</span> use an encryption scheme with
+IND-CCA2 security and an implicit KEM with IND-CCA2 security and IK-CCA2 security).<a href="#section-3-4.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-4.2">
+          <p id="section-3-4.2.1">Encapsulate shared secrets and exchange the ciphertexts.<a href="#section-3-4.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-4.3">
+          <p id="section-3-4.3.1">Decapsulate shared secrets, derive key confirmation keys and a session key.<a href="#section-3-4.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-3-4.4">
+          <p id="section-3-4.4.1">Perform Key Confirmation.<a href="#section-3-4.4.1" class="pilcrow">¶</a></p>
+</li>
+      </ol>
+<p id="section-3-5">Note that both peers take full transcripts (chain-hashes) of all the messages
+they send and receive, and include the resulting hash outputs among the
+inputs of the Key Derivation Function (KDF) that gets invoked to generate
+shared secrets (first for encrypting certificates, and the next time - to
+provide the shared secret that is the purpose of this protocol).<a href="#section-3-5" class="pilcrow">¶</a></p>
+<p id="section-3-6">While both parties have to share their certificates or identities
+for authentication, we assume the identities of each party shall
+remain confidential to those outside of this exchange.
+They encrypt their certificates with a shared symmetric
+ephemeral key that they generate via a ephemeral KEM.
+This key is used to encrypt the certificate and is an input to the KDF when
+generating the shared key. The final KDF that provides the negotiated
+shared secret, will also include this symmetric key in its input.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-7">Instead of generating a signature over the handshake transcript like TLS,
+PQuAKE performs an implicit authentication of the handshake.
+It does this by making the protocol's session key dependent on not only a series
+of KEM calculated shared secrets but also dependent on the hashes of the sent
+and received messages.
+Since only their corresponding party, who they have authenticated,
+can know those secrets,
+deriving the same session key implicitly authenticates
+each other while creating a shared secret.<a href="#section-3-7" class="pilcrow">¶</a></p>
+<div id="protocol-diagram">
+<section id="section-3.1">
+        <h3 id="name-protocol-diagram">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-protocol-diagram" class="section-name selfRef">Protocol Diagram</a>
+        </h3>
+<div class="alignLeft art-text artwork" id="section-3.1-1">
+<pre>
+Initiator                                                 Responder
+-------------------------------------------------------------------
+
+Establish confidential link and exchange certificates
+-----------------------------------------------------
+(sk_e, pk_e) &lt;- KEM.keygen()
+
+{ pk_e } --&gt;
+                                    (ct_e, ss_e) &lt;- KEM.encap(pk_e)
+
+                                                       &lt;-- { ct_e }
+
+ss_e &lt;- KEM.decap(ct_e, sk_e)
+
+k_hid &lt;- kdf_1(ss_pre, ss_e || "HID")
+                                k_hid &lt;- kdf(ss_pre, ss_e || "HID")
+
+e_cert_i &lt;- Enc(k_hid, cert_i)       e_cert_r &lt;- Enc(k_hid, cert_r)
+
+{ e_cert_i } --&gt;                                   &lt;-- { e_cert_r }
+
+
+Encapsulate and send shared secrets
+-----------------------------------
+cert_r &lt;- Dec(k_hid, e_cert_r)       cert_i &lt;- Dec(k_hid, e_cert_i)
+
+if cert_r is not valid, abort         if cert_i is not valid, abort
+
+(ct_i, ss_i) &lt;- KEM.encap(pk_r)     (ct_r, ss_r) &lt;- KEM.encap(pk_i)
+
+{ ct_i } --&gt;                                           &lt;-- { ct_r }
+
+
+Decapsulate shared secrets and derive session keys
+--------------------------------------------------
+ss_r &lt;- KEM.decap(sk_i, ct_r)         ss_i &lt;- KEM.decap(sk_r, ct_i)
+
+send_hash &lt;- H(hf, pk_e, e_cert_i, ct_i)
+                           send_hash &lt;- H(hf, ct_e, e_cert_r, ct_r)
+
+recv_hash &lt;- H(hf, ct_e, e_cert_r, ct_r)
+                           recv_hash &lt;- H(hf, pk_e, e_cert_i, ct_i)
+
+S &lt;- ss_e||ss_i||ss_r||send_hash||recv_hash
+                        S &lt;- ss_e||ss_i||ss_r||recv_hash||send_hash
+
+k_C_i, k_C_r, ... &lt;- kdf_2(hf2, S)
+                                 k_C_i, k_C_r, ... &lt;- kdf_2(hf2, S)
+
+
+Key Confirmation
+----------------
+{ HMAC(k_C_i, recv_hash || send_hash) } --&gt;
+                        &lt;-- { HMAC(k_C_r, send_hash || recv_hash) }
+</pre><a href="#section-3.1-1" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="exchange-certificates">
+<section id="section-3.2">
+        <h3 id="name-exchange-certificates">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-exchange-certificates" class="section-name selfRef">Exchange certificates</a>
+        </h3>
+<p id="section-3.2-1">During this step,
+both nodes establish a shared ephemeral key via a KEM, then
+use it to encrypt certificates before transmitting them.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">The initiator generates an ephemeral key and transmits the encapsulated secret.
+The responder <span class="bcp14">MUST</span> decapsulate the ciphertext.
+Both parties <span class="bcp14">MUST</span> derive a shared ephemeral key from the encapsulated secret
+and the pre-shared secret if it is present.
+Both parties <span class="bcp14">MUST</span> encrypt and transmit their certificates.
+Both parties <span class="bcp14">MUST</span> validate the certificate's signature.
+If the verification of a signature fails, the protocol <span class="bcp14">MUST</span> abort.
+Implementors need to be careful to avoid aborting based off
+the other node's identity
+until the end of the protocol to maintain identity hiding of the peer.
+Note that key encapsulation mechanism <span class="bcp14">SHOULD</span> be IND-CCA2 and IK-CCA2
+secure and <span class="bcp14">SHOULD NOT</span> abort (it <span class="bcp14">SHOULD</span> be an implicit KEM).<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+<div id="key-derivation-of-khid-with-preshared-secret">
+<section id="section-3.2.1">
+          <h4 id="name-key-derivation-of-k_hid-wit">
+<a href="#section-3.2.1" class="section-number selfRef">3.2.1. </a><a href="#name-key-derivation-of-k_hid-wit" class="section-name selfRef">Key Derivation of k_hid with preshared secret</a>
+          </h4>
+<p id="section-3.2.1-1"><code>k_hid &lt;- kdf_1(ss_pre, ss_e || "HID");</code><a href="#section-3.2.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="key-derivation-of-khid-without-preshared-secret">
+<section id="section-3.2.2">
+          <h4 id="name-key-derivation-of-k_hid-with">
+<a href="#section-3.2.2" class="section-number selfRef">3.2.2. </a><a href="#name-key-derivation-of-k_hid-with" class="section-name selfRef">Key Derivation of k_hid without preshared secret</a>
+          </h4>
+<p id="section-3.2.2-1"><code>k_hid &lt;- kdf_1(ss_e, "HID");</code><a href="#section-3.2.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="initiator">
+<section id="section-3.2.3">
+          <h4 id="name-initiator">
+<a href="#section-3.2.3" class="section-number selfRef">3.2.3. </a><a href="#name-initiator" class="section-name selfRef">Initiator</a>
+          </h4>
+<p id="section-3.2.3-1"><code>e_cert_i &lt;- E(k_hid, cert_i);</code><a href="#section-3.2.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="responder">
+<section id="section-3.2.4">
+          <h4 id="name-responder">
+<a href="#section-3.2.4" class="section-number selfRef">3.2.4. </a><a href="#name-responder" class="section-name selfRef">Responder</a>
+          </h4>
+<p id="section-3.2.4-1"><code>e_cert_r &lt;- E(k_hid, cert_r);</code><a href="#section-3.2.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="encapsulate-shared-secrets">
+<section id="section-3.3">
+        <h3 id="name-encapsulate-shared-secrets">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-encapsulate-shared-secrets" class="section-name selfRef">Encapsulate shared secrets</a>
+        </h3>
+<p id="section-3.3-1">During this step,
+both nodes generate an encapsulated secret via a KEM.
+The ciphertexts are exchanged.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+<div id="initiator-1">
+<section id="section-3.3.1">
+          <h4 id="name-initiator-2">
+<a href="#section-3.3.1" class="section-number selfRef">3.3.1. </a><a href="#name-initiator-2" class="section-name selfRef">Initiator</a>
+          </h4>
+<p id="section-3.3.1-1"><code>(ct_r, ss_r) &lt;- KEM.encap(pk_i);</code><a href="#section-3.3.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="responder-1">
+<section id="section-3.3.2">
+          <h4 id="name-responder-2">
+<a href="#section-3.3.2" class="section-number selfRef">3.3.2. </a><a href="#name-responder-2" class="section-name selfRef">Responder</a>
+          </h4>
+<p id="section-3.3.2-1"><code>(ct_i, ss_i) &lt;- KEM.encap(pk_r);</code><a href="#section-3.3.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="decapsulate-ciphertexts-and-key-derivation">
+<section id="section-3.4">
+        <h3 id="name-decapsulate-ciphertexts-and">
+<a href="#section-3.4" class="section-number selfRef">3.4. </a><a href="#name-decapsulate-ciphertexts-and" class="section-name selfRef">Decapsulate ciphertexts and key derivation</a>
+        </h3>
+<p id="section-3.4-1">The ciphertexts are decapsulated by both parties.
+At this point, both sides have all the shared secrets
+required to derive a set of session keys.<a href="#section-3.4-1" class="pilcrow">¶</a></p>
+<div id="initiator-2">
+<section id="section-3.4.1">
+          <h4 id="name-initiator-3">
+<a href="#section-3.4.1" class="section-number selfRef">3.4.1. </a><a href="#name-initiator-3" class="section-name selfRef">Initiator</a>
+          </h4>
+<p id="section-3.4.1-1"><code>send_hash &lt;- hash(pk_e, e_cert_i, ct_i);</code><a href="#section-3.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.4.1-2"><code>recv_hash &lt;- hash(ct_e, e_cert_r, ct_r);</code><a href="#section-3.4.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.4.1-3"><code>transcript &lt;- (send_hash, recv_hash);</code><a href="#section-3.4.1-3" class="pilcrow">¶</a></p>
+<p id="section-3.4.1-4"><code>k_C_i, k_C_r, k_session = kdf_2(ss_e, ss_i, ss_r, transcript);</code><a href="#section-3.4.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="responder-2">
+<section id="section-3.4.2">
+          <h4 id="name-responder-3">
+<a href="#section-3.4.2" class="section-number selfRef">3.4.2. </a><a href="#name-responder-3" class="section-name selfRef">Responder</a>
+          </h4>
+<p id="section-3.4.2-1"><code>send_hash &lt;- hash(ct_e, e_cert_r, ct_r);</code><a href="#section-3.4.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.4.2-2"><code>recv_hash &lt;- hash(pk_e, e_cert_i, ct_i);</code><a href="#section-3.4.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.4.2-3"><code>transcript &lt;- (recv_hash, send_hash);</code><a href="#section-3.4.2-3" class="pilcrow">¶</a></p>
+<p id="section-3.4.2-4"><code>k_C_i, k_C_r, k_session = kdf_2(ss_e, ss_i, ss_r, transcript);</code><a href="#section-3.4.2-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="key-confirmation">
+<section id="section-3.5">
+        <h3 id="name-key-confirmation">
+<a href="#section-3.5" class="section-number selfRef">3.5. </a><a href="#name-key-confirmation" class="section-name selfRef">Key Confirmation</a>
+        </h3>
+<p id="section-3.5-1">Key confirmation is done by calculating an HMAC of the chain-hash
+of all the sent and received messages correspondingly, using
+the appropriate Key Confirmation key derived in step 3.
+The initiator <span class="bcp14">MUST</span> use the key K~ir~, and the responder
+<span class="bcp14">MUST</span> use the key K~ri~.<a href="#section-3.5-1" class="pilcrow">¶</a></p>
+<div id="initiator-3">
+<section id="section-3.5.1">
+          <h4 id="name-initiator-4">
+<a href="#section-3.5.1" class="section-number selfRef">3.5.1. </a><a href="#name-initiator-4" class="section-name selfRef">Initiator</a>
+          </h4>
+<p id="section-3.5.1-1"><code>C_i &lt;- HMAC(k_C_i, send_hash || recv_hash);</code><a href="#section-3.5.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="responder-3">
+<section id="section-3.5.2">
+          <h4 id="name-responder-4">
+<a href="#section-3.5.2" class="section-number selfRef">3.5.2. </a><a href="#name-responder-4" class="section-name selfRef">Responder</a>
+          </h4>
+<p id="section-3.5.2-1"><code>C_r &lt;- HMAC(k_C_r, recv_hash || send_hash);</code><a href="#section-3.5.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="error-handling">
+<section id="section-3.6">
+        <h3 id="name-error-handling">
+<a href="#section-3.6" class="section-number selfRef">3.6. </a><a href="#name-error-handling" class="section-name selfRef">Error Handling</a>
+        </h3>
+<p id="section-3.6-1">We make no assumptions about the underlying transport that
+carries PQuAKE messages, because no error - whether
+maliciously introduced or accidental - in any of its
+messages can impact correctness of the protocol itself.
+We consider two kinds of errors:<a href="#section-3.6-1" class="pilcrow">¶</a></p>
+<p id="section-3.6-2">a. Corruption of a message - will result in protocol failure (abort)<a href="#section-3.6-2" class="pilcrow">¶</a></p>
+<p id="section-3.6-3">b. Failure to receive a message within expected time interval, aka
+   timeout - will result in protocol failure (abort).<a href="#section-3.6-3" class="pilcrow">¶</a></p>
+<p id="section-3.6-4">Handling the protocol timeout (how long to wait until declaring
+failure to receive) is the responsibility of the implementation
+deployer. The implementer <span class="bcp14">SHOULD</span> make this value configurable.<a href="#section-3.6-4" class="pilcrow">¶</a></p>
+<p id="section-3.6-5">Note: the more the underlying transport does
+to detect or mitigate line errors (aka, non-malicious errors),
+the likelier the protocol is to successfully complete.
+Ideally, the transport would offer at least the capabilities
+of UDP.<a href="#section-3.6-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="protocol-messages">
+<section id="section-4">
+      <h2 id="name-protocol-messages">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-protocol-messages" class="section-name selfRef">Protocol Messages</a>
+      </h2>
+<p id="section-4-1">We do not include explicit checksums because it is practically
+impossible for the protocol to succeed if any message would
+arrive corrupted, either maliciously, or by a random error.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<div id="message-format">
+<section id="section-4.1">
+        <h3 id="name-message-format">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-message-format" class="section-name selfRef">Message Format</a>
+        </h3>
+<p id="section-4.1-1">A message of the protocol is formatted as follows:<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.1-2">
+<pre>
+ 0               1               2               3
+ 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|    Version    |     Type      |            Length             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                             Data                            ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre><a href="#section-4.1-2" class="pilcrow">¶</a>
+</div>
+<p id="section-4.1-3">Version: 8 bits<a href="#section-4.1-3" class="pilcrow">¶</a></p>
+<p id="section-4.1-4">The version field indicates the format of the initiator hello message.
+This document describes version 1.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
+<p id="section-4.1-5">Type: 8 bits<a href="#section-4.1-5" class="pilcrow">¶</a></p>
+<p id="section-4.1-6">This field indicates the current step of the protocol.<a href="#section-4.1-6" class="pilcrow">¶</a></p>
+<p id="section-4.1-7">Length: 16 bits<a href="#section-4.1-7" class="pilcrow">¶</a></p>
+<p id="section-4.1-8">Length is the length of the data, measured in octets. This field
+allows the length of the data to be up to 65535 octets.<a href="#section-4.1-8" class="pilcrow">¶</a></p>
+<p id="section-4.1-9">Data: variable<a href="#section-4.1-9" class="pilcrow">¶</a></p>
+<p id="section-4.1-10">This field changes based on the current step of the protocol.<a href="#section-4.1-10" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="hello-messages">
+<section id="section-4.2">
+        <h3 id="name-hello-messages">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-hello-messages" class="section-name selfRef">Hello Messages</a>
+        </h3>
+<p id="section-4.2-1">The Initiator generates an ephemeral KEM key-pair
+<code>(sk_e, pk_e) = KEM.keygen()</code>
+and sends the public key <code>pk_e</code>
+to its intended recipient (the Responder).
+The Responder performs encapsulation
+<code>(ct_e, ss_e) = KEM.encap(pk_e)</code>
+and sends the
+ciphertext <code>ct_e</code> to the Initiator.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<div id="initiator-hello">
+<section id="section-4.2.1">
+          <h4 id="name-initiator-hello">
+<a href="#section-4.2.1" class="section-number selfRef">4.2.1. </a><a href="#name-initiator-hello" class="section-name selfRef">Initiator Hello</a>
+          </h4>
+<p id="section-4.2.1-1">An Initiator Hello message is formatted as follows:<a href="#section-4.2.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.2.1-2">
+<pre>
+ 0               1               2               3
+ 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|    Version    |     Type      |            Length             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Ephemeral Public Key                     ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre><a href="#section-4.2.1-2" class="pilcrow">¶</a>
+</div>
+<p id="section-4.2.1-3">Version: 8 bits<a href="#section-4.2.1-3" class="pilcrow">¶</a></p>
+<p id="section-4.2.1-4">The version field indicates the format of the initiator hello message.
+This document describes version 1.<a href="#section-4.2.1-4" class="pilcrow">¶</a></p>
+<p id="section-4.2.1-5">Type: 1<a href="#section-4.2.1-5" class="pilcrow">¶</a></p>
+<p id="section-4.2.1-6">This field indicates the state of the protocol.<a href="#section-4.2.1-6" class="pilcrow">¶</a></p>
+<p id="section-4.2.1-7">Length: 16 bits<a href="#section-4.2.1-7" class="pilcrow">¶</a></p>
+<p id="section-4.2.1-8">Length is the length of the ephemeral public key, measured in octets.
+This field allows the length of a ephemeral public key to be up
+to 65535 octets.<a href="#section-4.2.1-8" class="pilcrow">¶</a></p>
+<p id="section-4.2.1-9">Ephemeral Public Key: variable<a href="#section-4.2.1-9" class="pilcrow">¶</a></p>
+<p id="section-4.2.1-10">This field <span class="bcp14">SHOULD</span> be unique for each protocol execution.<a href="#section-4.2.1-10" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="responder-hello">
+<section id="section-4.2.2">
+          <h4 id="name-responder-hello">
+<a href="#section-4.2.2" class="section-number selfRef">4.2.2. </a><a href="#name-responder-hello" class="section-name selfRef">Responder Hello</a>
+          </h4>
+<p id="section-4.2.2-1">A Responder Hello message is formatted as follows:<a href="#section-4.2.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.2.2-2">
+<pre>
+ 0               1               2               3
+ 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|    Version    |     Type      |            Length             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Encapsulated Secret                      ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre><a href="#section-4.2.2-2" class="pilcrow">¶</a>
+</div>
+<p id="section-4.2.2-3">Type: 2<a href="#section-4.2.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.2.2-4">Encapsulated Secret: variable<a href="#section-4.2.2-4" class="pilcrow">¶</a></p>
+<p id="section-4.2.2-5">The size of this field depends on the key encapsulation mechanism used.<a href="#section-4.2.2-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="certificate-exchange">
+<section id="section-4.3">
+        <h3 id="name-certificate-exchange">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-certificate-exchange" class="section-name selfRef">Certificate Exchange</a>
+        </h3>
+<p id="section-4.3-1">A Certificate Exchange message is formatted as follows:<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.3-2">
+<pre>
+ 0               1               2               3
+ 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|    Version    |     Type      |            Length             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|      Initial Vector      | Encrypted Certificate           ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|      Authentication Tag       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre><a href="#section-4.3-2" class="pilcrow">¶</a>
+</div>
+<p id="section-4.3-3">Type: 3 for initiator, 4 for responder<a href="#section-4.3-3" class="pilcrow">¶</a></p>
+<p id="section-4.3-4">Initial Vector: 96 bits<a href="#section-4.3-4" class="pilcrow">¶</a></p>
+<p id="section-4.3-5">Encrypted Certificate: variable<a href="#section-4.3-5" class="pilcrow">¶</a></p>
+<p id="section-4.3-6">Authentication Tag: 128 bits<a href="#section-4.3-6" class="pilcrow">¶</a></p>
+<p id="section-4.3-7">The certificate encrypted with the derived key k_hid.<a href="#section-4.3-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="certificate-format">
+<section id="section-4.4">
+        <h3 id="name-certificate-format">
+<a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-certificate-format" class="section-name selfRef">Certificate Format</a>
+        </h3>
+<p id="section-4.4-1">For now, we use standard X.509 certificate <span>[<a href="#X.509" class="cite xref">X.509</a>]</span> with OIDs
+specifying ML-KEM and ML-DSA correspondingly.
+Future extensions may use different certificate formats.<a href="#section-4.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="encapsulation">
+<section id="section-4.5">
+        <h3 id="name-encapsulation">
+<a href="#section-4.5" class="section-number selfRef">4.5. </a><a href="#name-encapsulation" class="section-name selfRef">Encapsulation</a>
+        </h3>
+<p id="section-4.5-1">An Encapsulation message is formatted as follows:<a href="#section-4.5-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.5-2">
+<pre>
+ 0               1               2               3
+ 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|    Version    |     Type      |            Length             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Encapsulated Secret                      ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre><a href="#section-4.5-2" class="pilcrow">¶</a>
+</div>
+<p id="section-4.5-3">Type: 5 for initiator, 6 for responder<a href="#section-4.5-3" class="pilcrow">¶</a></p>
+<p id="section-4.5-4">Encapsulated Secret: variable<a href="#section-4.5-4" class="pilcrow">¶</a></p>
+<p id="section-4.5-5">The size of this field depends on the key encapsulation mechanism used.<a href="#section-4.5-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="key-confirmation-1">
+<section id="section-4.6">
+        <h3 id="name-key-confirmation-2">
+<a href="#section-4.6" class="section-number selfRef">4.6. </a><a href="#name-key-confirmation-2" class="section-name selfRef">Key Confirmation</a>
+        </h3>
+<p id="section-4.6-1">A Key Confirmation message is formatted as follows:<a href="#section-4.6-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.6-2">
+<pre>
+ 0               1               2               3
+ 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|    Version    |     Type      |            Length             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                  Key Confirmation Value                     ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre><a href="#section-4.6-2" class="pilcrow">¶</a>
+</div>
+<p id="section-4.6-3">Type: 7 for initiator, 8 for responder<a href="#section-4.6-3" class="pilcrow">¶</a></p>
+<p id="section-4.6-4">Key Confirmation Value: 384 bits (output size of SHA384)<a href="#section-4.6-4" class="pilcrow">¶</a></p>
+<p id="section-4.6-5">This field is the computed HMAC value of the exchange transcript.<a href="#section-4.6-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="integration-into-ikev2">
+<section id="section-5">
+      <h2 id="name-integration-into-ikev2">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-integration-into-ikev2" class="section-name selfRef">Integration into IKEv2</a>
+      </h2>
+<p id="section-5-1">Integration into IKEv2 <span>[<a href="#IKEV2" class="cite xref">IKEV2</a>]</span> results in a hybrid Post-Quantum
+Key Exchange.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-2">During the <code>IKE_INIT</code> phase, the peers establish ephemeral shared
+secret key via ECDHE (Ephemeral Diffie-Hellman key exchange),
+and signal that they will use PQuAKE in the <code>IKE_INTERMEDIATE</code> phase.<a href="#section-5-2" class="pilcrow">¶</a></p>
+<p id="section-5-3">Messages exchanged during <code>IKE_INTERMEDIATE</code> phase,
+perform the actual key exchange.<a href="#section-5-3" class="pilcrow">¶</a></p>
+<p id="section-5-4">Instead of explicit signatures during <code>IKE_AUTH</code> phase,
+both peers exchange Key Confirmation messages here.<a href="#section-5-4" class="pilcrow">¶</a></p>
+<div id="ikesainit">
+<section id="section-5.1">
+        <h3 id="name-ike_sa_init">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-ike_sa_init" class="section-name selfRef">IKE_SA_INIT</a>
+        </h3>
+<p id="section-5.1-1">The first pair of messages negotiate cryptographic algorithms,
+exchange nonces, and do an elliptic curve Diffie-Hellman exchange
+in order to maintain compatibility with standard IKEv2. The initiator
+indicates its support for Intermediate Exchange by including a notification
+of type INTERMEDIATE_EXCHANGE_SUPPORTED in the IKE_SA_INIT request message.
+If the responder also supports this exchange, it includes this notification
+in the response message.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">The IKE_SA_INIT exchange is as follows:<a href="#section-5.1-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.1-3">
+<pre>
+Initiator                                             Responder
+---------------------------------------------------------------
+HDR, SAi1, KEi, Ni,
+N(PQUAKE_SUPPORTED),
+N(INTERMEDIATE_EXCHANGE_SUPPORTED) ---&gt;
+                                            HDR, SAr1, KEr, Nr,
+                                           N(PQUAKE_SUPPORTED),
+                        &lt;--- N(INTERMEDIATE_EXCHANGE_SUPPORTED)
+</pre><a href="#section-5.1-3" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="ikeintermediate">
+<section id="section-5.2">
+        <h3 id="name-ike_intermediate">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-ike_intermediate" class="section-name selfRef">IKE_INTERMEDIATE</a>
+        </h3>
+<p id="section-5.2-1">If both peers indicated their support for the Intermediate Exchange,
+the initiator may proceed with the PQuAKE key exchange.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.2-2">
+<pre>
+Initiator                                             Responder
+---------------------------------------------------------------
+HDR, SK { PQUAKE_INITIATOR_HELLO } --&gt;
+
+                         &lt;-- HDR, SK { PQUAKE_RESPONDER_HELLO }
+
+HDR, SK { PQUAKE_CERT_EXCHANGE_I } --&gt;
+
+                         &lt;-- HDR, SK { PQUAKE_CERT_EXCHANGE_R }
+
+HDR, SK { PQUAKE_KEY_ENCAP_I } --&gt;
+
+                             &lt;-- HDR, SK { PQUAKE_KEY_ENCAP_R }
+</pre><a href="#section-5.2-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="ikeauth">
+<section id="section-5.3">
+        <h3 id="name-ike_auth">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-ike_auth" class="section-name selfRef">IKE_AUTH</a>
+        </h3>
+<p id="section-5.3-1">The last pair of messages (IKE_AUTH) authenticate the previous
+messages and establish the first Child SA.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.3-2">
+<pre>
+Initiator                                             Responder
+---------------------------------------------------------------
+HDR, SK { PQUAKE_KEY_CONFIRMATION_I } --&gt;
+
+                      &lt;-- HDR, SK { PQUAKE_KEY_CONFIRMATION_R }
+</pre><a href="#section-5.3-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-6">
+      <h2 id="name-security-considerations">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-6-1">This is a security protocol, and it holds the properties described
+in (TODO reference)
+in the presence of passive or active attacker on the network.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">One potential concern is the confidentiality of the peers' identities
+carried in their certificates.
+An active attacker can learn their identities during the certificate
+exchange step.
+Using a pre-shared secret will prevent disclosure of these certificates,
+keeping peers identities confidential.
+Since there are costs associated with out-of-band distribution of
+that secret, it would be typically shared among the Community of
+Interest (CoI). In that case, this protocol would protect peers identities
+against active attackers outside of this Community
+of Interest, but not against an active attacker that is a member
+of CoI.<a href="#section-6-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-7">
+      <h2 id="name-iana-considerations">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-7-1">This document defines a new Notify Message Type in the
+"IKEv2 Notify Message Types - Status Types" registry:<a href="#section-7-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7-2">
+<pre>
+&lt;TBA&gt;   PQUAKE_SUPPORTED
+</pre><a href="#section-7-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-8">
+      <h2 id="name-references">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-8.1">
+        <h3 id="name-normative-references">
+<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="IKEV2">[IKEV2]</dt>
+        <dd>
+<span class="refAuthor">Kaufman, C.</span>, <span class="refAuthor">Hoffman, P.</span>, <span class="refAuthor">Nir, Y.</span>, <span class="refAuthor">Eronen, P.</span>, and <span class="refAuthor">T. Kivinen</span>, <span class="refTitle">"Internet Key Exchange Protocol Version 2 (IKEv2)"</span>, <span class="seriesInfo">STD 79</span>, <span class="seriesInfo">RFC 7296</span>, <span class="seriesInfo">DOI 10.17487/RFC7296</span>, <time datetime="2014-10" class="refDate">October 2014</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7296">https://www.rfc-editor.org/rfc/rfc7296</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="X.509">[X.509]</dt>
+      <dd>
+<span class="refAuthor">Housley, R.</span>, <span class="refAuthor">Ford, W.</span>, <span class="refAuthor">Polk, W.</span>, and <span class="refAuthor">D. Solo</span>, <span class="refTitle">"Internet X.509 Public Key Infrastructure Certificate and CRL Profile"</span>, <span class="seriesInfo">RFC 2459</span>, <span class="seriesInfo">DOI 10.17487/RFC2459</span>, <time datetime="1999-01" class="refDate">January 1999</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2459">https://www.rfc-editor.org/rfc/rfc2459</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-8.2">
+        <h3 id="name-informative-references">
+<a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="EAP">[EAP]</dt>
+        <dd>
+<span class="refAuthor">Aboba, B.</span>, <span class="refAuthor">Simon, D.</span>, and <span class="refAuthor">P. Eronen</span>, <span class="refTitle">"Extensible Authentication Protocol (EAP) Key Management Framework"</span>, <span class="seriesInfo">RFC 5247</span>, <span class="seriesInfo">DOI 10.17487/RFC5247</span>, <time datetime="2008-08" class="refDate">August 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5247">https://www.rfc-editor.org/rfc/rfc5247</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="MQV">[MQV]</dt>
+      <dd>
+<span class="refAuthor">Law, L.</span>, <span class="refAuthor">Menezes, A.</span>, <span class="refAuthor">Qu, M.</span>, <span class="refAuthor">Solinas, J.</span>, and <span class="refAuthor">S. Vanstone</span>, <span class="refTitle">"An Efficient Protocol for Authenticated Key Agreement"</span>, <span class="seriesInfo">DOI 10.1023/A:1022595222606</span>, <time datetime="1998" class="refDate">1998</time>, <span>&lt;<a href="https://doi.org/10.1023/A:1022595222606">https://doi.org/10.1023/A:1022595222606</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-A">
+      <h2 id="name-acknowledgments">
+<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="appendix-A-1">The authors want to thank Roger Khazan (MIT/LL), Adam Margetts (MIT/LL)
+for reviewing this work and giving helpful suggestions.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-B">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Uri Blumenthal</span></div>
+<div dir="auto" class="left"><span class="org">MIT</span></div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:uri@ll.mit.edu" class="email">uri@ll.mit.edu</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Brandon Luo</span></div>
+<div dir="auto" class="left"><span class="org">MIT</span></div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:brandon.luo@ll.mit.edu" class="email">brandon.luo@ll.mit.edu</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Sean O'Melia</span></div>
+<div dir="auto" class="left"><span class="org">MIT</span></div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:sean.omelia@ll.mit.edu" class="email">sean.omelia@ll.mit.edu</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Gabriel Torres</span></div>
+<div dir="auto" class="left"><span class="org">MIT</span></div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:gabriel.torres@ll.mit.edu" class="email">gabriel.torres@ll.mit.edu</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">David A. Wilson</span></div>
+<div dir="auto" class="left"><span class="org">MIT</span></div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:david.wilson@ll.mit.edu" class="email">david.wilson@ll.mit.edu</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
