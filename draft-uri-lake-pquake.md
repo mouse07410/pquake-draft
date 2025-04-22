@@ -5,11 +5,12 @@ category: "std"
 
 docname: draft-uri-lake-pquake-latest
 submissiontype: IETF  # also: "independent", "IAB", or "IRTF"
-number: 01
+number:
+date:
 consensus: true
 v: 3
 area: "Security"
-workgroup: "Lightweight Authenticated Key Exchange"
+workgroup: "LAKE Lightweight Authenticated Key Exchange"
 keyword:
 
 - Post-Quantum
