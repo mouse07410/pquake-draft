@@ -1,6 +1,8 @@
 LIBDIR := lib
 include $(LIBDIR)/main.mk
 
+export UPLOAD_EMAIL ?= uri@ll.mit.edu
+
 $(LIBDIR)/main.mk:
 ifneq (,$(shell grep "path *= *$(LIBDIR)" .gitmodules 2>/dev/null))
 	git submodule sync
