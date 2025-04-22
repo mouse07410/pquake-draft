@@ -4,7 +4,7 @@
 
 Internet Engineering Task Force (IETF)                     U. Blumenthal
 Request for Comments: 1                                           B. Luo
-Category: Informational                                       S. O'Melia
+Category: Standards Track                                     S. O'Melia
 ISSN: 2070-1721                                                G. Torres
                                                                D. Wilson
                                                                      MIT
@@ -33,15 +33,13 @@ Abstract
 
 Status of This Memo
 
-   This document is not an Internet Standards Track specification; it is
-   published for informational purposes.
+   This is an Internet Standards Track document.
 
    This document is a product of the Internet Engineering Task Force
    (IETF).  It represents the consensus of the IETF community.  It has
    received public review and has been approved for publication by the
-   Internet Engineering Steering Group (IESG).  Not all documents
-   approved by the IESG are candidates for any level of Internet
-   Standard; see Section 2 of RFC 7841.
+   Internet Engineering Steering Group (IESG).  Further information on
+   Internet Standards is available in Section 2 of RFC 7841.
 
    Information about the current status of this document, any errata,
    and how to provide feedback on it may be obtained at
@@ -117,6 +115,12 @@ Table of Contents
    overhead by reducing the number of signatures transmitted by each
    party to one offline-generated certificate signature.  It is designed
    to be an add-on to such protocols as EAP [EAP], IKEv2, and others.
+   Since computing a PQ digital signature typically is more expensive
+   than performing a PQ KEM, there is a benefit of reduced computational
+   costs.
+
+   The overall idea of the implicit authentication of the peers comes
+   from the MQV protocol.
 
    Both parties MAY have a pre-shared symmetric secret key, usually
    distributed among all the members of the given network or Community
