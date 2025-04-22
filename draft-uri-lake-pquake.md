@@ -1,7 +1,7 @@
 ---
 title: "PQuAKE - Post-Quantum Authenticated Key Exchange"
 abbrev: "PQuAKE"
-category: info
+category: "std"
 
 docname: draft-uri-lake-pquake-latest
 submissiontype: IETF  # also: "independent", "IAB", or "IRTF"
@@ -123,6 +123,12 @@ by reducing the number of signatures transmitted
 by each party to one offline-generated certificate
 signature. It is designed to be an add-on to such
 protocols as EAP {{EAP}}, IKEv2, and others.
+Since computing a PQ digital signature typically is more
+expensive than performing a PQ KEM, there is a benefit
+of reduced computational costs.
+
+The overall idea of the implicit authentication of the peers
+comes from the {{{MQV}}} protocol.
 
 Both parties MAY have a pre-shared symmetric secret key, usually
 distributed among all the members of the given network or
