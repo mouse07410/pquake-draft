@@ -8,7 +8,7 @@ Category: Informational                                       S. O'Melia
 ISSN: 2070-1721                                                G. Torres
                                                                D. Wilson
                                                                      MIT
-                                                           18 April 2025
+                                                           22 April 2025
 
 
             PQuAKE - Post-Quantum Authenticated Key Exchange
