@@ -100,10 +100,10 @@ This protocol is suitable for
 integration into protocols that establish dynamic
 secure sessions, such as Extensible Authentication Protocol (EAP),
 Internet Key Exchange Version 2 (IKEv2),
-or Secure COmmunications Interoperability Protocol (SCIP).
+or Secure Communications Interoperability Protocol (SCIP).
 This protocol has proofs in the verifiers Verifpal and CryptoVerif for
 security properties such as secrecy of the session
-key, mutual authentication, identity hiding with a preshared secret, and forward
+key, mutual authentication, identity hiding with a pre-shared secret, and forward
 secrecy of the session key.
 The authors are in the process of publishing the proofs.
 
