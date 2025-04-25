@@ -21,3 +21,4 @@ Gemfile.lock
 package-lock.json
 report.xml
 !requirements.txt
+.DS_Store
