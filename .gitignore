@@ -1,3 +1,4 @@
+.DS_Store
 .tags
 *.html
 *.pdf
@@ -21,4 +22,3 @@ Gemfile.lock
 package-lock.json
 report.xml
 !requirements.txt
-.DS_Store
