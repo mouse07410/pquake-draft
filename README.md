@@ -4,10 +4,10 @@
 
 This is the working area for the individual Internet-Draft, "PQuAKE - Post-Quantum Authenticated Key Exchange".
 
-* [Editor's Copy](https://mouse07410.github.io/pquake-draft/#go.draft-uri-lake-pquake.html)
-* [Datatracker Page](https://datatracker.ietf.org/doc/draft-uri-lake-pquake)
-* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-uri-lake-pquake)
-* [Compare Editor's Copy to Individual Draft](https://mouse07410.github.io/pquake-draft/#go.draft-uri-lake-pquake.diff)
+* [Editor's Copy](https://mouse07410.github.io/pquake-draft/#go.draft-uri-cfrg-pquake.html)
+* [Datatracker Page](https://datatracker.ietf.org/doc/draft-uri-cfrg-pquake)
+* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-uri-cfrg-pquake)
+* [Compare Editor's Copy to Individual Draft](https://mouse07410.github.io/pquake-draft/#go.draft-uri-cfrg-pquake.diff)
 
 
 ## Contributing
