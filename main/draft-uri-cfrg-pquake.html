@@ -29,28 +29,27 @@ key, mutual authentication, identity hiding with a pre-shared secret, and forwar
 secrecy of the session key.
 The authors are in the process of publishing the proofs. 
     " name="description">
-<meta content="xml2rfc 3.28.1" name="generator">
-<meta content="Post-Quantum" name="keyword">
+<meta content="xml2rfc 3.33.0" name="generator">
+<meta content="PQ" name="keyword">
 <meta content="Key Exchange" name="keyword">
 <meta content="Compact" name="keyword">
 <meta content="Authenticated" name="keyword">
-<meta content="draft-uri-lake-pquake-latest" name="ietf.draft">
+<meta content="draft-uri-cfrg-pquake-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.28.1
-    Python 3.12.10
+  xml2rfc 3.33.0
+    Python 3.12.13
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
-    intervaltree 3.1.0
+    intervaltree 3.2.1
     Jinja2 3.1.6
-    lxml 5.3.0
-    platformdirs 4.3.7
+    lxml 6.0.2
+    platformdirs 4.9.6
     pycountry 24.6.1
-    PyYAML 6.0.2
-    requests 2.32.3
-    setuptools 70.3.0
-    wcwidth 0.2.13
+    PyYAML 6.0.3
+    requests 2.33.1
+    wcwidth 0.7.0
 -->
-<link href="draft-uri-lake-pquake.xml" rel="alternate" type="application/rfc+xml">
+<link href="draft-uri-cfrg-pquake.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
 <style type="text/css">@font-face {
   font-family: 'Lora';
@@ -189,7 +188,7 @@ The authors are in the process of publishing the proofs.
   font-weight: 400;
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
   font-family: 'Oxygen Mono';
@@ -197,7 +196,8 @@ The authors are in the process of publishing the proofs.
   font-weight: 400;
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 }
 
 @font-face {
@@ -314,16 +314,19 @@ h1, h2, h3, h4, h5, h6 {
   font-size-adjust: 0.5;
   color: var(--title-color);
 }
-h1#title {
-  font-size: 32px;
-  line-height: 40px;
-  clear: both;
-}
-h1#title, h1#rfcnum {
-  margin: 1.5em 0 0.2em;
-}
-h1#rfcnum + h1#title {
-  margin: 0.2em 0;
+h1 {
+  &#title {
+    font-size: 32px;
+    line-height: 40px;
+    clear: both;
+    margin: 1.5em 0 0.2em;
+  }
+  &#rfcnum {
+    margin: 1.5em 0 0.2em;
+    & + h1#title {
+      margin: 0.2em 0;
+    }
+  }
 }
 
 h1, h2, h3 {
@@ -343,10 +346,10 @@ h4, h5, h6 {
 #abstract+p {
   font-size: 18px;
   line-height: 24px;
-}
-#abstract+p code, #abstract+p samp, #abstract+p tt {
-  font-size: 16px;
-  line-height: 0;
+  & code, & samp, & tt {
+    font-size: 16px;
+    line-height: 0;
+  }
 }
 
 p {
@@ -357,59 +360,59 @@ p {
 div {
   margin: 0;
 }
-.alignRight.art-text {
-  background-color: var(--highlight-color);
-  border: 1px solid var(--line-color);
-  border-radius: 3px;
-  padding: 0.5em 1em 0;
-  margin-bottom: 0.5em;
-}
-.alignRight.art-text pre {
-  padding: 0;
-  width: auto;
-}
 .alignRight {
   margin: 1em 0;
-}
-.alignRight > *:first-child {
-  border: none;
-  margin: 0;
-  float: right;
-  clear: both;
-}
-.alignRight > *:nth-child(2) {
-  clear: both;
-  display: block;
-  border: none;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    margin: 0;
+    float: right;
+    clear: both;
+  }
+  & > *:nth-child(2) {
+    clear: both;
+    display: block;
+    border: none;
+  }
 }
 svg {
   display: block;
-}
-/* font-family isn't space-separated, but =~ will have to do */
-svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
-  font-family: var(--font-mono);
-}
-.alignCenter.art-text {
-  background-color: var(--highlight-color);
-  border: 1px solid var(--line-color);
-  border-radius: 3px;
-  padding: 0.5em 1em 0;
-  margin-bottom: 0.5em;
-}
-.alignCenter.art-text pre {
-  padding: 0;
-  width: auto;
+  /* font-family isn't space-separated, but =~ will have to do */
+  &[font-family~="monospace" i], & [font-family~="monospace" i] {
+    font-family: var(--font-mono);
+  }
 }
 .alignCenter {
   margin: 1em 0;
-}
-.alignCenter > *:first-child {
-  border: none;
-  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
-     support flexbox yet.
-  */
-  display: table;
-  margin: 0 auto;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+       support flexbox yet.
+    */
+    display: table;
+    margin: 0 auto;
+  }
 }
 
 /* lists */
@@ -447,26 +450,25 @@ dl {
     --indent: 5ch;
     & > dt {
       min-width: calc(var(--indent) - 2ch);
+      float: none;
     }
-  }
-  &.olPercent > dt {
-    float: none;
   }
 
   dl > dd > & {
     margin-top: 0.5em;
     margin-bottom: 0;
   }
-}
-dl:not(.dlNewline) > dt {
-  float: left;
-  margin-right: 2ch;
-  min-width: 8ch;
-}
-dl > dd {
-  margin-bottom: .8em;
-  margin-left: var(--indent) !important; /* stupid element overrides */
-  min-height: 2ex;
+
+  &:not(.dlNewline) > dt {
+    float: left;
+    margin-right: 2ch;
+    min-width: 8ch;
+  }
+  & > dd {
+    margin-bottom: .8em;
+    margin-left: var(--indent) !important; /* stupid element overrides */
+    min-height: 2ex;
+  }
 }
 :is(dl.compact, .dlCompact) > dd {
   margin-bottom: 0;
@@ -482,20 +484,22 @@ dl > dd {
 }
 
 /* links */
-a, a[href].selfRef:hover {
+a {
   text-decoration: none;
+  &[href] {
+    color: var(--link-color);
+    &:hover { text-decoration: underline; }
+    &.selfRef {
+      color: var(--text-color);
+      &:hover {
+        text-decoration: none;
+        background-color: var(--highlight-color);
+      }
+    }
+  }
 }
-a[href] {
-  color: var(--link-color);
-}
-a[href].selfRef, .iref + a[href].internal {
+.iref + a[href].internal {
   color: var(--text-color);
-}
-a[href]:hover {
-  text-decoration: underline;
-}
-a[href].selfRef:hover {
-  background-color: var(--highlight-color);
 }
 a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
   white-space: nowrap;
@@ -531,9 +535,9 @@ img {
 figure {
   margin: 0.5em 0;
   padding: 0;
-}
-figure blockquote {
-  margin: 0.8em 0.4em 0.4em;
+  & blockquote {
+    margin: 0.8em 0.4em 0.4em;
+  }
 }
 figcaption, caption {
   font-style: italic;
@@ -543,17 +547,19 @@ figcaption, caption {
 }
 @media screen {
   /* Auto-collapse boilerplate. */
-  :is(#status-of-memo, #copyright) p {
-    margin: -2px 0;
-    max-height: 0;
-    transition: max-height 2s ease, margin 0.5s ease 0.5s;
-    overflow: hidden;
-  }
-  :is(#status-of-memo, #copyright):hover p,
-  :is(#status-of-memo, #copyright) h2:target ~ p {
-    margin: 0.5em 0;
-    max-height: 500px;
-    overflow: auto;
+  :is(#status-of-memo, #copyright) {
+    & p {
+      margin: -2px 0;
+      max-height: 0;
+      transition: max-height 2s ease, margin 0.5s ease 0.5s;
+      overflow: hidden;
+    }
+    &:hover p,
+    & h2:target ~ p {
+      margin: 0.5em 0;
+      max-height: 500px;
+      overflow: auto;
+    }
   }
   pre, svg {
     display: inline-block;
@@ -589,6 +595,7 @@ aside, blockquote {
 }
 blockquote {
   margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
 }
 cite {
   display: block;
@@ -602,25 +609,17 @@ table {
   max-width: 100%;
   margin: 0 0 1em;
   border-collapse: collapse;
-}
-table.right {
-  margin-left: auto;
-}
-table.center {
-  margin-left: auto;
-  margin-right: auto;
-}
-table.left {
-  margin-right: auto;
-}
-table .text-left {
-  text-align: left;
-}
-table .text-center {
-  text-align: center;
-}
-table .text-right {
-  text-align: right;
+  &.right { margin-left: auto; }
+  &.center { margin-left: auto; margin-right: auto; }
+  &.left { margin-right: auto; }
+  & .text-left { text-align: left; }
+  & .text-center { text-align: center; }
+  & .text-right { text-align: right; }
+  & caption {
+    margin: 0;
+    padding: 3px 0 3px 1em;
+  }
+  & p { margin: 0; }
 }
 
 thead, tbody {
@@ -640,13 +639,6 @@ th {
 :is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
   background-color: var(--highlight-color);
 }
-table caption {
-  margin: 0;
-  padding: 3px 0 3px 1em;
-}
-table p {
-  margin: 0;
-}
 
 /* pilcrow */
 a.pilcrow {
@@ -657,18 +649,16 @@ a.pilcrow {
     color: var(--pilcrow-weak);
     &:hover { text-decoration: none; }
   }
-}
-@media not print {
-  :hover > a.pilcrow {
-    opacity: 1;
+  @media not print {
+    :hover > &, &:focus {
+      opacity: 1;
+    }
+    &[href]:hover {
+      color: var(--pilcrow-strong);
+      background-color: transparent;
+    }
   }
-  a.pilcrow[href]:hover {
-    color: var(--pilcrow-strong);
-    background-color: transparent;
-  }
-}
-@media print {
-  a.pilcrow {
+  @media print {
     display: none;
   }
 }
@@ -727,9 +717,9 @@ sub, sup {
   font-size: 0.9em;
   font-style: italic;
   margin-top: 2em;
-}
-.docInfo .prepared {
-  float: right;
+  & .prepared {
+    float: right;
+  }
 }
 
 /* table of contents */
@@ -819,23 +809,27 @@ hr.addr {
   max-width: calc(100% - 16px);
 }
 @media (min-width: 500px) {
-  #authors-addresses > section {
-    column-count: 2;
-    column-gap: 20px;
-  }
-  #authors-addresses > section > h2 {
-    column-span: all;
-  }
-  /* hack for break-inside: avoid-column */
-  #authors-addresses address {
-    display: inline-block;
-    break-inside: avoid-column;
+  #authors-addresses {
+    & > section {
+      column-count: 2;
+      column-gap: 20px;
+    }
+    & > section > h2 {
+      column-span: all;
+    }
+    /* hack for break-inside: avoid-column */
+    & address {
+      display: inline-block;
+      break-inside: avoid-column;
+    }
   }
 }
 
 /* Comments */
-.rfcEditorRemove p:first-of-type {
-  font-style: italic;
+.rfcEditorRemove {
+  & p:first-of-type {
+    font-style: italic;
+  }
 }
 .cref {
   background-color: rgba(249, 232, 105, 0.3);
@@ -846,19 +840,21 @@ hr.addr {
 }
 
 @media screen {
-  #toc nav {
-    font-family: var(--font-title);
-    font-weight: 360;
-    & > ul { margin-bottom: 2em; }
-    & ul {
-      margin: 0 0 0 4px;
-      & :is(p, li) {
-        margin: 2px 0;
+  #toc {
+    & nav {
+      font-family: var(--font-title);
+      font-weight: 360;
+      & > ul { margin-bottom: 2em; }
+      & ul {
+        margin: 0 0 0 4px;
+        & :is(p, li) {
+          margin: 2px 0;
+        }
       }
     }
-  }
-  #toc a.toplink {
-    float: right;
+    & a.toplink {
+      float: right;
+    }
   }
 }
 @media not screen {
@@ -879,54 +875,54 @@ hr.addr {
     margin: 0;
     border-bottom: 1px solid #ccc;
     opacity: 0.6;
-  }
-  #toc h2 {
-    margin: 0;
-    padding: 2px 0 2px 6px;
-    padding-right: 1em;
-    font-size: 18px;
-    line-height: 24px;
-    min-width: 190px;
-    text-align: right;
-    background-color: #444;
-    color: white;
-    cursor: pointer;
-    &::before { /* css hamburger */
-      float: right;
-      position: relative;
-      width: 1em;
-      height: 1px;
-      left: -164px;
-      margin: 8px 0 0 0;
-      background: white none repeat scroll 0 0;
-      box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
-      content: "";
+    & h2 {
+      margin: 0;
+      padding: 2px 0 2px 6px;
+      padding-right: 1em;
+      font-size: 18px;
+      line-height: 24px;
+      min-width: 190px;
+      text-align: right;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+      &::before { /* css hamburger */
+        float: right;
+        position: relative;
+        width: 1em;
+        height: 1px;
+        left: -164px;
+        margin: 8px 0 0 0;
+        background: white none repeat scroll 0 0;
+        box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+        content: "";
+      }
     }
-  }
-  #toc nav {
-    display: none;
-    background-color: var(--background-color);
-    padding: 0.5em 1em 1em;
-    overflow: auto;
-    overscroll-behavior: contain;
-    height: calc(100vh - 48px);
-    border-left: 1px solid #ddd;
-  }
-  #toc.active {
-    opacity: 1;
-    & nav { display: block; }
-  }
-  /* Make the collapsed ToC header render white on gray also when it's a link */
-  #toc h2 a,
-  #toc h2 a:is(:link, :focus, :hover),
-  #toc a.toplink,
-  #toc a.toplink:hover {
-    color: white;
-    background-color: #444;
-    text-decoration: none;
-  }
-  #toc a.toplink {
-    margin: 2px 0.5em 0;
+    & nav {
+      display: none;
+      background-color: var(--background-color);
+      padding: 0.5em 1em 1em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      height: calc(100vh - 48px);
+      border-left: 1px solid #ddd;
+    }
+    &.active {
+      opacity: 1;
+      & nav { display: block; }
+    }
+    /* Make the collapsed ToC header render white on gray also when it's a link */
+    & h2 a,
+    & h2 a:is(:link, :focus, :hover),
+    & a.toplink,
+    & a.toplink:hover {
+      color: white;
+      background-color: #444;
+      text-decoration: none;
+    }
+    & a.toplink {
+      margin: 2px 0.5em 0;
+    }
   }
 }
 
@@ -945,26 +941,26 @@ hr.addr {
     margin: 0;
     padding: 0;
     z-index: 1;
-  }
-  #toc h2 {
-    margin: 0;
-    padding: 0.25em 1em 1em 0;
-  }
-  #toc nav {
-    display: block;
-    height: calc(90vh - 84px);
-    bottom: 0;
-    padding: 0.5em 0 2em;
-    overflow: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
+    & h2 {
+      margin: 0;
+      padding: 0.25em 1em 1em 0;
+    }
+    & nav {
+      display: block;
+      height: calc(90vh - 84px);
+      bottom: 0;
+      padding: 0.5em 0 2em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+    & a.toplink {
+      margin: 8px 0.5em 0;
+    }
   }
   img { /* future proofing */
     max-width: 100%;
     height: auto;
-  }
-  #toc a.toplink {
-    margin: 8px 0.5em 0;
   }
 }
 
@@ -980,12 +976,13 @@ hr.addr {
   #n-copyright-notice {
     border-bottom: none;
   }
-  #toc, #n-introduction {
-    page-break-before: always;
-  }
   #toc {
+    page-break-before: always;
     border-top: none;
     padding-top: 0;
+  }
+  #n-introduction {
+    page-break-before: always;
   }
   figure, pre, .vcard {
     page-break-inside: avoid;
@@ -1047,17 +1044,19 @@ hr.addr {
 }
 
 /* SVG Trick: a prefix match works because only black and white are allowed */
-svg :is([stroke="black"], [stroke^="#000"]) {
-  stroke: var(--text-color);
-}
-svg :is([stroke="white"], [stroke^="#fff"]) {
-  stroke: var(--background-color);
-}
-svg :is([fill="black"], [fill^="#000"], :not([fill])) {
-  fill: var(--text-color);
-}
-svg :is([fill="white"], [fill^="#fff"]) {
-  fill: var(--background-color);
+svg {
+  & :is([stroke="black"], [stroke^="#000"]) {
+    stroke: var(--text-color);
+  }
+  & :is([stroke="white"], [stroke^="#fff"]) {
+    stroke: var(--background-color);
+  }
+  & :is([fill="black"], [fill^="#000"], :not([fill])) {
+    fill: var(--text-color);
+  }
+  & :is([fill="white"], [fill^="#fff"]) {
+    fill: var(--background-color);
+  }
 }
 </style>
 
@@ -1067,11 +1066,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">PQuAKE</td>
-<td class="right">April 2025</td>
+<td class="right">June 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Blumenthal, et al.</td>
-<td class="center">Expires 27 October 2025</td>
+<td class="center">Expires 3 December 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1079,17 +1078,17 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <div id="internal-metadata" class="document-information">
 <dl id="identifiers">
 <dt class="label-workgroup">Workgroup:</dt>
-<dd class="workgroup">LAKE Lightweight Authenticated Key Exchange</dd>
+<dd class="workgroup">Crypto Forum Research Group</dd>
 <dt class="label-internet-draft">Internet-Draft:</dt>
-<dd class="internet-draft">draft-uri-lake-pquake-latest</dd>
+<dd class="internet-draft">draft-uri-cfrg-pquake-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-04-25" class="published">25 April 2025</time>
+<time datetime="2026-06-01" class="published">1 June 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
-<dd class="intended-status">Standards Track</dd>
+<dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-10-27">27 October 2025</time></dd>
+<dd class="expires"><time datetime="2026-12-03">3 December 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1142,13 +1141,13 @@ The authors are in the process of publishing the proofs.<a href="#section-abstra
       </h2>
 <p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
 <p id="section-note.1-2">
-        The latest revision of this draft can be found at <span><a href="https://mouse07410.github.io/pquake-draft/draft-uri-lake-pquake.html">https://mouse07410.github.io/pquake-draft/draft-uri-lake-pquake.html</a></span>.
-        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-uri-lake-pquake/">https://datatracker.ietf.org/doc/draft-uri-lake-pquake/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+        The latest revision of this draft can be found at <span><a href="https://mouse07410.github.io/pquake-draft/draft-uri-cfrg-pquake.html">https://mouse07410.github.io/pquake-draft/draft-uri-cfrg-pquake.html</a></span>.
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-uri-cfrg-pquake/">https://datatracker.ietf.org/doc/draft-uri-cfrg-pquake/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
 <p id="section-note.1-3">
         Discussion of this document takes place on the
-        Lightweight Authenticated Key Exchange Working Group mailing list (<span><a href="mailto:lake@ietf.org">mailto:lake@ietf.org</a></span>),
-        which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/lake/">https://mailarchive.ietf.org/arch/browse/lake/</a></span>.
-        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/lake/">https://www.ietf.org/mailman/listinfo/lake/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+        Crypto Forum Research Group Research Group mailing list (<span><a href="mailto:cfrg@irtf.org">mailto:cfrg@irtf.org</a></span>),
+        which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/cfrg/">https://mailarchive.ietf.org/arch/browse/cfrg/</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/cfrg/">https://www.ietf.org/mailman/listinfo/cfrg/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
 <p id="section-note.1-4">Source for this draft and an issue tracker can be found at
         <span><a href="https://github.com/mouse07410/pquake-draft">https://github.com/mouse07410/pquake-draft</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
 </section>
@@ -1171,7 +1170,7 @@ The authors are in the process of publishing the proofs.<a href="#section-abstra
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 27 October 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 3 December 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1180,7 +1179,7 @@ The authors are in the process of publishing the proofs.<a href="#section-abstra
 <a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
         </h2>
 <p id="section-boilerplate.2-1">
-            Copyright (c) 2025 IETF Trust and the persons identified as the
+            Copyright (c) 2026 IETF Trust and the persons identified as the
             document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.2-2">
             This document is subject to BCP 78 and the IETF Trust's Legal
@@ -1188,10 +1187,7 @@ The authors are in the process of publishing the proofs.<a href="#section-abstra
             (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
             publication of this document. Please review these documents
             carefully, as they describe your rights and restrictions with
-            respect to this document. Code Components extracted from this
-            document must include Revised BSD License text as described in
-            Section 4.e of the Trust Legal Provisions and are provided without
-            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+            respect to this document.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="toc">
@@ -1308,40 +1304,55 @@ The authors are in the process of publishing the proofs.<a href="#section-abstra
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
             <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-integration-into-ikev2" class="internal xref">Integration into IKEv2</a></p>
-<ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
-                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-ike_sa_init" class="internal xref">IKE_SA_INIT</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
-                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-ike_intermediate" class="internal xref">IKE_INTERMEDIATE</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
-                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-ike_auth" class="internal xref">IKE_AUTH</a></p>
-</li>
-            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
-            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-integration-into-edhoc" class="internal xref">Integration into EDHOC</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
-            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-integration-into-eap" class="internal xref">Integration into EAP</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
-            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-references" class="internal xref">References</a></p>
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-formal-proofs" class="internal xref">Formal Proofs</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
-                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-methodology" class="internal xref">Methodology</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2">
-                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="auto internal xref">8.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="auto internal xref">8.2</a>.  <a href="#name-proven-security-properties" class="internal xref">Proven Security Properties</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3">
+                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-cryptographic-assumptions" class="internal xref">Cryptographic Assumptions</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.4">
+                <p id="section-toc.1-1.8.2.4.1"><a href="#section-8.4" class="auto internal xref">8.4</a>.  <a href="#name-proof-approach-intuition" class="internal xref">Proof Approach (Intuition)</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.5">
+                <p id="section-toc.1-1.8.2.5.1"><a href="#section-8.5" class="auto internal xref">8.5</a>.  <a href="#name-limitations-and-future-work" class="internal xref">Limitations and Future Work</a></p>
 </li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
-            <p id="section-toc.1-1.9.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
-            <p id="section-toc.1-1.10.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+            <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#section-11" class="auto internal xref">11</a>. <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.1">
+                <p id="section-toc.1-1.11.2.1.1"><a href="#section-11.1" class="auto internal xref">11.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.2">
+                <p id="section-toc.1-1.11.2.2.1"><a href="#section-11.2" class="auto internal xref">11.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
 </li>
         </ul>
 </nav>
@@ -1354,87 +1365,61 @@ The authors are in the process of publishing the proofs.<a href="#section-abstra
       </h2>
 <p id="section-1-1">The primary goal of PQuAKE is to minimize the communication overhead of
 Post-Quantum (PQ) public-key cryptography during a key exchange.
-Bandwidth or power limited devices may not realistically use
-alternative PQ key exchanges
-such as the TLS handshake protocol to derive
-a shared symmetric key,
-as PQ digital signatures and keys are drastically larger.
-This protocol minimizes the communication overhead
-by reducing the number of signatures transmitted
-by each party to one offline-generated certificate
-signature. It is designed to be an add-on to such
-protocols as EAP <span>[<a href="#EAP" class="cite xref">EAP</a>]</span>, IKEv2, and others.
-Since computing a PQ digital signature typically is more
-expensive than performing a PQ KEM, there is a benefit
-of reduced computational costs.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">The overall idea of the implicit authentication of the peers
-comes from the <span class="contact-name">MQV</span> protocol.<a href="#section-1-2" class="pilcrow">¶</a></p>
+Bandwidth or power limited devices may not realistically use alternative
+PQ key exchanges such as the TLS handshake protocol to derive a shared
+symmetric key, as PQ digital signatures and keys are drastically larger.
+This protocol minimizes the communication overhead by reducing the
+number of signatures transmitted by each party to one offline-generated
+certificate signature. It is designed to be an add-on to such protocols
+as EAP <span>[<a href="#EAP" class="cite xref">EAP</a>]</span>, IKEv2, and others. Since computing a PQ digital
+signature typically is more expensive than performing a PQ KEM, there is
+a benefit of reduced computational costs.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">The overall idea of the implicit authentication of the peers comes from
+the <span class="contact-name">MQV</span> protocol.<a href="#section-1-2" class="pilcrow">¶</a></p>
 <p id="section-1-3">Both parties <span class="bcp14">MAY</span> have a pre-shared symmetric secret key, usually
-distributed among all the members of the given network or
-Community of Interest (COI).
-Adding a pre-shared symmetric key to the key derivation ensures
-confidentiality of the peers' identities (certificates) against
+distributed among all the members of the given network or Community of
+Interest (COI). Adding a pre-shared symmetric key to the key derivation
+ensures confidentiality of the peers' identities (certificates) against
 active attackers that do not have that pre-shared key.<a href="#section-1-3" class="pilcrow">¶</a></p>
 <p id="section-1-4">The protocol maintains the following security guarantees:<a href="#section-1-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-1-5.1">
-          <p id="section-1-5.1.1">The secure channel between the Initiator and Responder is mutually authenticated<a href="#section-1-5.1.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-1-5.2">
-          <p id="section-1-5.2.1">Key freshness, aka a new key is generated for this channel, and it hasn't
-  been reused or stale;<a href="#section-1-5.2.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-1-5.3">
-          <p id="section-1-5.3.1">If two parties properly follow the protocol,
-  both parties will compute the same shared keys that are known only to them;<a href="#section-1-5.3.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-1-5.4">
-          <p id="section-1-5.4.1">Perfect Forward Secrecy, aka after the channel is closed, there is no way
-  for an adversary to break security properties associated with the shared
-  key established via this protocol;<a href="#section-1-5.4.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-1-5.5">
-          <p id="section-1-5.5.1">Security against replay attacks;<a href="#section-1-5.5.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-1-5.6">
-          <p id="section-1-5.6.1">Confidentiality of peers' identities against passive adversary;<a href="#section-1-5.6.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-1-5.7">
-          <p id="section-1-5.7.1">Confidentiality of peers' identities against active adversary (aka, Man-In-The-Middle)
-  when both peers utilize long-term pre-shared key.<a href="#section-1-5.7.1" class="pilcrow">¶</a></p>
+          <p id="section-1-5.1.1">The secure channel between the Initiator and Responder is mutually
+authenticated - Key freshness, aka a new key is generated for this
+channel, and it hasn't been reused or stale; - If two parties properly
+follow the protocol, both parties will compute the same shared keys that
+are known only to them; - Perfect Forward Secrecy, aka after the channel
+is closed, there is no way for an adversary to break security properties
+associated with the shared key established via this protocol; - Security
+against replay attacks; - Confidentiality of peers' identities against
+passive adversary; - Confidentiality of peers' identities against active
+adversary (aka, Man-In-The-Middle) when both peers utilize long-term
+pre-shared key.<a href="#section-1-5.1.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-1-6">This protocol has proofs in the verifiers Verifpal and CryptoVerif for
-security properties such as secrecy of the session
-key, mutual authentication, identity hiding with a preshared secret, and forward
-secrecy of the session key.
-The authors are in the process of publishing the proofs.<a href="#section-1-6" class="pilcrow">¶</a></p>
-<p id="section-1-7">It is important to note that PQuAKE does not replace protocols like
-the TLS record protocol, only the handshake protocol.
-Other protocols such as IKEv2, SCIP, or EAP may integrate PQuAKE
-into their key exchange phase.<a href="#section-1-7" class="pilcrow">¶</a></p>
+security properties such as secrecy of the session key, mutual
+authentication, identity hiding with a preshared secret, and forward
+secrecy of the session key. The authors are in the process of publishing
+the proofs.<a href="#section-1-6" class="pilcrow">¶</a></p>
+<p id="section-1-7">It is important to note that PQuAKE does not replace protocols like the
+TLS record protocol, only the handshake protocol. Other protocols such
+as IKEv2, SCIP, or EAP may integrate PQuAKE into their key exchange
+phase.<a href="#section-1-7" class="pilcrow">¶</a></p>
 <div id="compliance-requirements-for-the-components">
 <section id="section-1.1">
         <h3 id="name-compliance-requirements-for">
 <a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-compliance-requirements-for" class="section-name selfRef">Compliance requirements for the components</a>
         </h3>
-<p id="section-1.1-1">The building blocks of this protocol <span class="bcp14">SHALL</span> have the
-following security properties:<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<p id="section-1.1-1">The building blocks of this protocol <span class="bcp14">SHALL</span> have the following security
+properties:<a href="#section-1.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-1.1-2.1">
-            <p id="section-1.1-2.1.1">Symmetric Key Cryptosystem - IND-CCA2<a href="#section-1.1-2.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-2.2">
-            <p id="section-1.1-2.2.1">Key Encapsulation Mechanism (KEM) - Implicit, IND-CCA2 and IK-CCA2<a href="#section-1.1-2.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-2.3">
-            <p id="section-1.1-2.3.1">Key Derivation Function 1 - Random Oracle Hash Function<a href="#section-1.1-2.3.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-2.4">
-            <p id="section-1.1-2.4.1">Key Derivation Function 2 - Random Oracle Hash Function<a href="#section-1.1-2.4.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-2.5">
-            <p id="section-1.1-2.5.1">Message Authentication Code (MAC) - Pseudorandom Function<a href="#section-1.1-2.5.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-2.1.1">Symmetric Key Cryptosystem - IND-CCA2 - Key Encapsulation Mechanism
+(KEM) - Implicit, IND-CCA2 and IK-CCA2 - Key Derivation Function 1 -
+Random Oracle Hash Function - Key Derivation Function 2 - Random Oracle
+Hash Function - Message Authentication Code (MAC) - Pseudorandom
+Function<a href="#section-1.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
@@ -1444,29 +1429,14 @@ following security properties:<a href="#section-1.1-1" class="pilcrow">¶</a></p
         <h3 id="name-mandatory-to-implement-algo">
 <a href="#section-1.2" class="section-number selfRef">1.2. </a><a href="#name-mandatory-to-implement-algo" class="section-name selfRef">Mandatory-To-Implement algorithms</a>
         </h3>
-<p id="section-1.2-1">While this protocol has been formally proven to work with any
-KEM, MAC, and symmetric cipher that exhibit the above
-properties -- interoperability
-requires that a Mandatory-To-Implement (MTI) set of algorithms
-is specified for the Version 1 of the protocol:<a href="#section-1.2-1" class="pilcrow">¶</a></p>
+<p id="section-1.2-1">While this protocol has been formally proven to work with any KEM, MAC,
+and symmetric cipher that exhibit the above properties --
+interoperability requires that a Mandatory-To-Implement (MTI) set of
+algorithms is specified for the Version 1 of the protocol:<a href="#section-1.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-1.2-2.1">
-            <p id="section-1.2-2.1.1">Enc: AES-GCM-256<a href="#section-1.2-2.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.2-2.2">
-            <p id="section-1.2-2.2.1">KEM: ML-KEM-1024<a href="#section-1.2-2.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.2-2.3">
-            <p id="section-1.2-2.3.1">Hash: SHA384<a href="#section-1.2-2.3.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.2-2.4">
-            <p id="section-1.2-2.4.1">MAC: HMAC<a href="#section-1.2-2.4.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.2-2.5">
-            <p id="section-1.2-2.5.1">KDF: HKDF<a href="#section-1.2-2.5.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.2-2.6">
-            <p id="section-1.2-2.6.1">Signature: ML-DSA-87<a href="#section-1.2-2.6.1" class="pilcrow">¶</a></p>
+            <p id="section-1.2-2.1.1">Enc: AES-GCM-256 - KEM: ML-KEM-1024 - Hash: SHA384 - MAC: HMAC - KDF:
+HKDF - Signature: ML-DSA-87<a href="#section-1.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
@@ -1489,60 +1459,56 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
       <h2 id="name-protocol-description">
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-protocol-description" class="section-name selfRef">Protocol Description</a>
       </h2>
-<p id="section-3-1">The PQuAKE protocol consists of four steps. Within each step, the exchanges
-can happen asynchronously, but one step (aka, all of the exchanges of
-that step) <span class="bcp14">MUST</span> conclude before the peers
-can proceed to the next one.
-If any step results in an error, the protocol <span class="bcp14">SHOULD</span> abort.
-That includes receiving an out-of-order or corrupted message,
-or not receiving an expected message within the
-deployer-configured time interval. However, the protocol <span class="bcp14">SHOULD</span> only abort
-at the end of the protocol if the peer's identity does not match an out-of-band
-verification, and an implicit KEM without aborts <span class="bcp14">SHOULD</span> be used. Ideally, the
-protocol <span class="bcp14">SHOULD</span> only abort after the key confirmation step if the reason for aborting
-is related to the identities of the two parties.<a href="#section-3-1" class="pilcrow">¶</a></p>
-<p id="section-3-2">Currently, no notification to the other party, such as
-information about an abnormal completion and/or giving
-details of the error, is included in the protocol.<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-1">The PQuAKE protocol consists of four steps. Within each step, the
+exchanges can happen asynchronously, but one step (aka, all of the
+exchanges of that step) <span class="bcp14">MUST</span> conclude before the peers can proceed to
+the next one. If any step results in an error, the protocol <span class="bcp14">SHOULD</span>
+abort. That includes receiving an out-of-order or corrupted message, or
+not receiving an expected message within the deployer-configured time
+interval. However, the protocol <span class="bcp14">SHOULD</span> only abort at the end of the
+protocol if the peer's identity does not match an out-of-band
+verification, and an implicit KEM without aborts <span class="bcp14">SHOULD</span> be used.
+Ideally, the protocol <span class="bcp14">SHOULD</span> only abort after the key confirmation step
+if the reason for aborting is related to the identities of the two
+parties.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">Currently, no notification to the other party, such as information about
+an abnormal completion and/or giving details of the error, is included
+in the protocol.<a href="#section-3-2" class="pilcrow">¶</a></p>
 <p id="section-3-3">The four steps are the following:<a href="#section-3-3" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-3-4">
 <li id="section-3-4.1">
-          <p id="section-3-4.1.1">Establish an ephemeral symmetric key via hello messages and
-exchange encrypted certificates (one <span class="bcp14">MUST</span> use an encryption scheme with
-IND-CCA2 security and an implicit KEM with IND-CCA2 security and IK-CCA2 security).<a href="#section-3-4.1.1" class="pilcrow">¶</a></p>
+          <p id="section-3-4.1.1">Establish an ephemeral symmetric key via hello messages and exchange
+encrypted certificates (one <span class="bcp14">MUST</span> use an encryption scheme with IND-CCA2
+security and an implicit KEM with IND-CCA2 security and IK-CCA2
+security). 2. Encapsulate shared secrets and exchange the ciphertexts.<a href="#section-3-4.1.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-3-4.2">
-          <p id="section-3-4.2.1">Encapsulate shared secrets and exchange the ciphertexts.<a href="#section-3-4.2.1" class="pilcrow">¶</a></p>
-</li>
-        <li id="section-3-4.3">
-          <p id="section-3-4.3.1">Decapsulate shared secrets, derive key confirmation keys and a session key.<a href="#section-3-4.3.1" class="pilcrow">¶</a></p>
-</li>
-        <li id="section-3-4.4">
-          <p id="section-3-4.4.1">Perform Key Confirmation.<a href="#section-3-4.4.1" class="pilcrow">¶</a></p>
+          <p id="section-3-4.2.1">Decapsulate shared secrets, derive key confirmation keys and a
+session key. 4. Perform Key Confirmation.<a href="#section-3-4.2.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
-<p id="section-3-5">Note that both peers take full transcripts (chain-hashes) of all the messages
-they send and receive, and include the resulting hash outputs among the
-inputs of the Key Derivation Function (KDF) that gets invoked to generate
-shared secrets (first for encrypting certificates, and the next time - to
-provide the shared secret that is the purpose of this protocol).<a href="#section-3-5" class="pilcrow">¶</a></p>
-<p id="section-3-6">While both parties have to share their certificates or identities
-for authentication, we assume the identities of each party shall
-remain confidential to those outside of this exchange.
-They encrypt their certificates with a shared symmetric
-ephemeral key that they generate via a ephemeral KEM.
-This key is used to encrypt the certificate and is an input to the KDF when
-generating the shared key. The final KDF that provides the negotiated
-shared secret, will also include this symmetric key in its input.<a href="#section-3-6" class="pilcrow">¶</a></p>
-<p id="section-3-7">Instead of generating a signature over the handshake transcript like TLS,
-PQuAKE performs an implicit authentication of the handshake.
-It does this by making the protocol's session key dependent on not only a series
-of KEM calculated shared secrets but also dependent on the hashes of the sent
-and received messages.
-Since only their corresponding party, who they have authenticated,
-can know those secrets,
-deriving the same session key implicitly authenticates
-each other while creating a shared secret.<a href="#section-3-7" class="pilcrow">¶</a></p>
+<p id="section-3-5">Note that both peers take full transcripts (chain-hashes) of all the
+messages they send and receive, and include the resulting hash outputs
+among the inputs of the Key Derivation Function (KDF) that gets invoked
+to generate shared secrets (first for encrypting certificates, and the
+next time - to provide the shared secret that is the purpose of this
+protocol).<a href="#section-3-5" class="pilcrow">¶</a></p>
+<p id="section-3-6">While both parties have to share their certificates or identities for
+authentication, we assume the identities of each party shall remain
+confidential to those outside of this exchange. They encrypt their
+certificates with a shared symmetric ephemeral key that they generate
+via a ephemeral KEM. This key is used to encrypt the certificate and is
+an input to the KDF when generating the shared key. The final KDF that
+provides the negotiated shared secret, will also include this symmetric
+key in its input.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-7">Instead of generating a signature over the handshake transcript like
+TLS, PQuAKE performs an implicit authentication of the handshake. It
+does this by making the protocol's session key dependent on not only a
+series of KEM calculated shared secrets but also dependent on the hashes
+of the sent and received messages. Since only their corresponding party,
+who they have authenticated, can know those secrets, deriving the same
+session key implicitly authenticates each other while creating a shared
+secret.<a href="#section-3-7" class="pilcrow">¶</a></p>
 <div id="protocol-diagram">
 <section id="section-3.1">
         <h3 id="name-protocol-diagram">
@@ -1613,21 +1579,19 @@ Key Confirmation
         <h3 id="name-exchange-certificates">
 <a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-exchange-certificates" class="section-name selfRef">Exchange certificates</a>
         </h3>
-<p id="section-3.2-1">During this step,
-both nodes establish a shared ephemeral key via a KEM, then
-use it to encrypt certificates before transmitting them.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
-<p id="section-3.2-2">The initiator generates an ephemeral key and transmits the encapsulated secret.
-The responder <span class="bcp14">MUST</span> decapsulate the ciphertext.
-Both parties <span class="bcp14">MUST</span> derive a shared ephemeral key from the encapsulated secret
-and the pre-shared secret if it is present.
-Both parties <span class="bcp14">MUST</span> encrypt and transmit their certificates.
-Both parties <span class="bcp14">MUST</span> validate the certificate's signature.
-If the verification of a signature fails, the protocol <span class="bcp14">MUST</span> abort.
-Implementors need to be careful to avoid aborting based off
-the other node's identity
-until the end of the protocol to maintain identity hiding of the peer.
-Note that key encapsulation mechanism <span class="bcp14">SHOULD</span> be IND-CCA2 and IK-CCA2
-secure and <span class="bcp14">SHOULD NOT</span> abort (it <span class="bcp14">SHOULD</span> be an implicit KEM).<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.2-1">During this step, both nodes establish a shared ephemeral key via a KEM,
+then use it to encrypt certificates before transmitting them.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">The initiator generates an ephemeral key and transmits the encapsulated
+secret. The responder <span class="bcp14">MUST</span> decapsulate the ciphertext. Both parties <span class="bcp14">MUST</span>
+derive a shared ephemeral key from the encapsulated secret and the
+pre-shared secret if it is present. Both parties <span class="bcp14">MUST</span> encrypt and
+transmit their certificates. Both parties <span class="bcp14">MUST</span> validate the
+certificate's signature. If the verification of a signature fails, the
+protocol <span class="bcp14">MUST</span> abort. Implementors need to be careful to avoid aborting
+based off the other node's identity until the end of the protocol to
+maintain identity hiding of the peer. Note that key encapsulation
+mechanism <span class="bcp14">SHOULD</span> be IND-CCA2 and IK-CCA2 secure and <span class="bcp14">SHOULD NOT</span> abort (it
+<span class="bcp14">SHOULD</span> be an implicit KEM).<a href="#section-3.2-2" class="pilcrow">¶</a></p>
 <div id="key-derivation-of-khid-with-preshared-secret">
 <section id="section-3.2.1">
           <h4 id="name-key-derivation-of-k_hid-wit">
@@ -1667,8 +1631,7 @@ secure and <span class="bcp14">SHOULD NOT</span> abort (it <span class="bcp14">S
         <h3 id="name-encapsulate-shared-secrets">
 <a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-encapsulate-shared-secrets" class="section-name selfRef">Encapsulate shared secrets</a>
         </h3>
-<p id="section-3.3-1">During this step,
-both nodes generate an encapsulated secret via a KEM.
+<p id="section-3.3-1">During this step, both nodes generate an encapsulated secret via a KEM.
 The ciphertexts are exchanged.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
 <div id="initiator-1">
 <section id="section-3.3.1">
@@ -1693,9 +1656,9 @@ The ciphertexts are exchanged.<a href="#section-3.3-1" class="pilcrow">¶</a></p
         <h3 id="name-decapsulate-ciphertexts-and">
 <a href="#section-3.4" class="section-number selfRef">3.4. </a><a href="#name-decapsulate-ciphertexts-and" class="section-name selfRef">Decapsulate ciphertexts and key derivation</a>
         </h3>
-<p id="section-3.4-1">The ciphertexts are decapsulated by both parties.
-At this point, both sides have all the shared secrets
-required to derive a set of session keys.<a href="#section-3.4-1" class="pilcrow">¶</a></p>
+<p id="section-3.4-1">The ciphertexts are decapsulated by both parties. At this point, both
+sides have all the shared secrets required to derive a set of session
+keys.<a href="#section-3.4-1" class="pilcrow">¶</a></p>
 <div id="initiator-2">
 <section id="section-3.4.1">
           <h4 id="name-initiator-3">
@@ -1725,11 +1688,10 @@ required to derive a set of session keys.<a href="#section-3.4-1" class="pilcrow
         <h3 id="name-key-confirmation">
 <a href="#section-3.5" class="section-number selfRef">3.5. </a><a href="#name-key-confirmation" class="section-name selfRef">Key Confirmation</a>
         </h3>
-<p id="section-3.5-1">Key confirmation is done by calculating an HMAC of the chain-hash
-of all the sent and received messages correspondingly, using
-the appropriate Key Confirmation key derived in step 3.
-The initiator <span class="bcp14">MUST</span> use the key K~ir~, and the responder
-<span class="bcp14">MUST</span> use the key K~ri~.<a href="#section-3.5-1" class="pilcrow">¶</a></p>
+<p id="section-3.5-1">Key confirmation is done by calculating an HMAC of the chain-hash of all
+the sent and received messages correspondingly, using the appropriate
+Key Confirmation key derived in step 3. The initiator <span class="bcp14">MUST</span> use the key
+K~ir~, and the responder <span class="bcp14">MUST</span> use the key K~ri~.<a href="#section-3.5-1" class="pilcrow">¶</a></p>
 <div id="initiator-3">
 <section id="section-3.5.1">
           <h4 id="name-initiator-4">
@@ -1753,22 +1715,20 @@ The initiator <span class="bcp14">MUST</span> use the key K~ir~, and the respond
         <h3 id="name-error-handling">
 <a href="#section-3.6" class="section-number selfRef">3.6. </a><a href="#name-error-handling" class="section-name selfRef">Error Handling</a>
         </h3>
-<p id="section-3.6-1">We make no assumptions about the underlying transport that
-carries PQuAKE messages, because no error - whether
-maliciously introduced or accidental - in any of its
-messages can impact correctness of the protocol itself.
-We consider two kinds of errors:<a href="#section-3.6-1" class="pilcrow">¶</a></p>
+<p id="section-3.6-1">We make no assumptions about the underlying transport that carries
+PQuAKE messages, because no error - whether maliciously introduced or
+accidental - in any of its messages can impact correctness of the
+protocol itself. We consider two kinds of errors:<a href="#section-3.6-1" class="pilcrow">¶</a></p>
 <p id="section-3.6-2">a. Corruption of a message - will result in protocol failure (abort)<a href="#section-3.6-2" class="pilcrow">¶</a></p>
 <p id="section-3.6-3">b. Failure to receive a message within expected time interval, aka
-   timeout - will result in protocol failure (abort).<a href="#section-3.6-3" class="pilcrow">¶</a></p>
-<p id="section-3.6-4">Handling the protocol timeout (how long to wait until declaring
-failure to receive) is the responsibility of the implementation
-deployer. The implementer <span class="bcp14">SHOULD</span> make this value configurable.<a href="#section-3.6-4" class="pilcrow">¶</a></p>
-<p id="section-3.6-5">Note: the more the underlying transport does
-to detect or mitigate line errors (aka, non-malicious errors),
-the likelier the protocol is to successfully complete.
-Ideally, the transport would offer at least the capabilities
-of UDP.<a href="#section-3.6-5" class="pilcrow">¶</a></p>
+timeout - will result in protocol failure (abort).<a href="#section-3.6-3" class="pilcrow">¶</a></p>
+<p id="section-3.6-4">Handling the protocol timeout (how long to wait until declaring failure
+to receive) is the responsibility of the implementation deployer. The
+implementer <span class="bcp14">SHOULD</span> make this value configurable.<a href="#section-3.6-4" class="pilcrow">¶</a></p>
+<p id="section-3.6-5">Note: the more the underlying transport does to detect or mitigate line
+errors (aka, non-malicious errors), the likelier the protocol is to
+successfully complete. Ideally, the transport would offer at least the
+capabilities of UDP.<a href="#section-3.6-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1779,8 +1739,8 @@ of UDP.<a href="#section-3.6-5" class="pilcrow">¶</a></p>
 <a href="#section-4" class="section-number selfRef">4. </a><a href="#name-protocol-messages" class="section-name selfRef">Protocol Messages</a>
       </h2>
 <p id="section-4-1">We do not include explicit checksums because it is practically
-impossible for the protocol to succeed if any message would
-arrive corrupted, either maliciously, or by a random error.<a href="#section-4-1" class="pilcrow">¶</a></p>
+impossible for the protocol to succeed if any message would arrive
+corrupted, either maliciously, or by a random error.<a href="#section-4-1" class="pilcrow">¶</a></p>
 <div id="message-format">
 <section id="section-4.1">
         <h3 id="name-message-format">
@@ -1789,9 +1749,9 @@ arrive corrupted, either maliciously, or by a random error.<a href="#section-4-1
 <p id="section-4.1-1">A message of the protocol is formatted as follows:<a href="#section-4.1-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.1-2">
 <pre>
- 0               1               2               3
- 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0               1               2               3 0 1 2 3 4 5 6 7 0
+ 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |    Version    |     Type      |            Length             |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                             Data                            ...
@@ -1804,8 +1764,8 @@ This document describes version 1.<a href="#section-4.1-4" class="pilcrow">¶</a
 <p id="section-4.1-5">Type: 8 bits<a href="#section-4.1-5" class="pilcrow">¶</a></p>
 <p id="section-4.1-6">This field indicates the current step of the protocol.<a href="#section-4.1-6" class="pilcrow">¶</a></p>
 <p id="section-4.1-7">Length: 16 bits<a href="#section-4.1-7" class="pilcrow">¶</a></p>
-<p id="section-4.1-8">Length is the length of the data, measured in octets. This field
-allows the length of the data to be up to 65535 octets.<a href="#section-4.1-8" class="pilcrow">¶</a></p>
+<p id="section-4.1-8">Length is the length of the data, measured in octets. This field allows
+the length of the data to be up to 65535 octets.<a href="#section-4.1-8" class="pilcrow">¶</a></p>
 <p id="section-4.1-9">Data: variable<a href="#section-4.1-9" class="pilcrow">¶</a></p>
 <p id="section-4.1-10">This field changes based on the current step of the protocol.<a href="#section-4.1-10" class="pilcrow">¶</a></p>
 </section>
@@ -1815,14 +1775,10 @@ allows the length of the data to be up to 65535 octets.<a href="#section-4.1-8" 
         <h3 id="name-hello-messages">
 <a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-hello-messages" class="section-name selfRef">Hello Messages</a>
         </h3>
-<p id="section-4.2-1">The Initiator generates an ephemeral KEM key-pair
-<code>(sk_e, pk_e) = KEM.keygen()</code>
-and sends the public key <code>pk_e</code>
-to its intended recipient (the Responder).
-The Responder performs encapsulation
-<code>(ct_e, ss_e) = KEM.encap(pk_e)</code>
-and sends the
-ciphertext <code>ct_e</code> to the Initiator.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2-1">The Initiator generates an ephemeral KEM key-pair <code>(sk_e, pk_e) =
+KEM.keygen()</code> and sends the public key <code>pk_e</code> to its intended recipient
+(the Responder). The Responder performs encapsulation <code>(ct_e, ss_e) =
+KEM.encap(pk_e)</code> and sends the ciphertext <code>ct_e</code> to the Initiator.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
 <div id="initiator-hello">
 <section id="section-4.2.1">
           <h4 id="name-initiator-hello">
@@ -1831,9 +1787,9 @@ ciphertext <code>ct_e</code> to the Initiator.<a href="#section-4.2-1" class="pi
 <p id="section-4.2.1-1">An Initiator Hello message is formatted as follows:<a href="#section-4.2.1-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.2.1-2">
 <pre>
- 0               1               2               3
- 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0               1               2               3 0 1 2 3 4 5 6 7 0
+ 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |    Version    |     Type      |            Length             |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                    Ephemeral Public Key                     ...
@@ -1847,8 +1803,8 @@ This document describes version 1.<a href="#section-4.2.1-4" class="pilcrow">¶<
 <p id="section-4.2.1-6">This field indicates the state of the protocol.<a href="#section-4.2.1-6" class="pilcrow">¶</a></p>
 <p id="section-4.2.1-7">Length: 16 bits<a href="#section-4.2.1-7" class="pilcrow">¶</a></p>
 <p id="section-4.2.1-8">Length is the length of the ephemeral public key, measured in octets.
-This field allows the length of a ephemeral public key to be up
-to 65535 octets.<a href="#section-4.2.1-8" class="pilcrow">¶</a></p>
+This field allows the length of a ephemeral public key to be up to 65535
+octets.<a href="#section-4.2.1-8" class="pilcrow">¶</a></p>
 <p id="section-4.2.1-9">Ephemeral Public Key: variable<a href="#section-4.2.1-9" class="pilcrow">¶</a></p>
 <p id="section-4.2.1-10">This field <span class="bcp14">SHOULD</span> be unique for each protocol execution.<a href="#section-4.2.1-10" class="pilcrow">¶</a></p>
 </section>
@@ -1861,9 +1817,9 @@ to 65535 octets.<a href="#section-4.2.1-8" class="pilcrow">¶</a></p>
 <p id="section-4.2.2-1">A Responder Hello message is formatted as follows:<a href="#section-4.2.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.2.2-2">
 <pre>
- 0               1               2               3
- 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0               1               2               3 0 1 2 3 4 5 6 7 0
+ 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |    Version    |     Type      |            Length             |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                    Encapsulated Secret                      ...
@@ -1885,9 +1841,9 @@ to 65535 octets.<a href="#section-4.2.1-8" class="pilcrow">¶</a></p>
 <p id="section-4.3-1">A Certificate Exchange message is formatted as follows:<a href="#section-4.3-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3-2">
 <pre>
- 0               1               2               3
- 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0               1               2               3 0 1 2 3 4 5 6 7 0
+ 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |    Version    |     Type      |            Length             |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |      Initial Vector      | Encrypted Certificate           ...
@@ -1909,8 +1865,8 @@ to 65535 octets.<a href="#section-4.2.1-8" class="pilcrow">¶</a></p>
 <a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-certificate-format" class="section-name selfRef">Certificate Format</a>
         </h3>
 <p id="section-4.4-1">For now, we use standard X.509 certificate <span>[<a href="#X.509" class="cite xref">X.509</a>]</span> with OIDs
-specifying ML-KEM and ML-DSA correspondingly.
-Future extensions may use different certificate formats.<a href="#section-4.4-1" class="pilcrow">¶</a></p>
+specifying ML-KEM <span>[<a href="#FIPS203" class="cite xref">FIPS203</a>]</span> and ML-DSA <span>[<a href="#FIPS204" class="cite xref">FIPS204</a>]</span> correspondingly. Future extensions may use
+different certificate formats.<a href="#section-4.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="encapsulation">
@@ -1921,9 +1877,9 @@ Future extensions may use different certificate formats.<a href="#section-4.4-1"
 <p id="section-4.5-1">An Encapsulation message is formatted as follows:<a href="#section-4.5-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.5-2">
 <pre>
- 0               1               2               3
- 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0               1               2               3 0 1 2 3 4 5 6 7 0
+ 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |    Version    |     Type      |            Length             |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                    Encapsulated Secret                      ...
@@ -1943,9 +1899,9 @@ Future extensions may use different certificate formats.<a href="#section-4.4-1"
 <p id="section-4.6-1">A Key Confirmation message is formatted as follows:<a href="#section-4.6-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.6-2">
 <pre>
- 0               1               2               3
- 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0               1               2               3 0 1 2 3 4 5 6 7 0
+ 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |    Version    |     Type      |            Length             |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                  Key Confirmation Value                     ...
@@ -1964,133 +1920,254 @@ Future extensions may use different certificate formats.<a href="#section-4.4-1"
       <h2 id="name-integration-into-ikev2">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-integration-into-ikev2" class="section-name selfRef">Integration into IKEv2</a>
       </h2>
-<p id="section-5-1">Integration into IKEv2 <span>[<a href="#IKEV2" class="cite xref">IKEV2</a>]</span> results in a hybrid Post-Quantum
-Key Exchange.<a href="#section-5-1" class="pilcrow">¶</a></p>
-<p id="section-5-2">During the <code>IKE_INIT</code> phase, the peers establish ephemeral shared
-secret key via ECDHE (Ephemeral Diffie-Hellman key exchange),
-and signal that they will use PQuAKE in the <code>IKE_INTERMEDIATE</code> phase.<a href="#section-5-2" class="pilcrow">¶</a></p>
-<p id="section-5-3">Messages exchanged during <code>IKE_INTERMEDIATE</code> phase,
-perform the actual key exchange.<a href="#section-5-3" class="pilcrow">¶</a></p>
-<p id="section-5-4">Instead of explicit signatures during <code>IKE_AUTH</code> phase,
-both peers exchange Key Confirmation messages here.<a href="#section-5-4" class="pilcrow">¶</a></p>
-<div id="ikesainit">
-<section id="section-5.1">
-        <h3 id="name-ike_sa_init">
-<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-ike_sa_init" class="section-name selfRef">IKE_SA_INIT</a>
-        </h3>
-<p id="section-5.1-1">The first pair of messages negotiate cryptographic algorithms,
-exchange nonces, and do an elliptic curve Diffie-Hellman exchange
-in order to maintain compatibility with standard IKEv2. The initiator
-indicates its support for Intermediate Exchange by including a notification
-of type INTERMEDIATE_EXCHANGE_SUPPORTED in the IKE_SA_INIT request message.
-If the responder also supports this exchange, it includes this notification
-in the response message.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
-<p id="section-5.1-2">The IKE_SA_INIT exchange is as follows:<a href="#section-5.1-2" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.1-3">
-<pre>
-Initiator                                             Responder
----------------------------------------------------------------
-HDR, SAi1, KEi, Ni,
-N(PQUAKE_SUPPORTED),
-N(INTERMEDIATE_EXCHANGE_SUPPORTED) ---&gt;
-                                            HDR, SAr1, KEr, Nr,
-                                           N(PQUAKE_SUPPORTED),
-                        &lt;--- N(INTERMEDIATE_EXCHANGE_SUPPORTED)
-</pre><a href="#section-5.1-3" class="pilcrow">¶</a>
-</div>
+<p id="section-5-1">PQuAKE can be integrated into IKEv2 <span>[<a href="#IKEV2" class="cite xref">IKEV2</a>]</span> as an alternative
+authenticated key exchange mechanism.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-2">One possible approach is:<a href="#section-5-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5-3.1">
+          <p id="section-5-3.1.1">Use <code>IKE_SA_INIT</code> to perform classical negotiation and optional hybrid
+key exchange signaling - Use <code>IKE_INTERMEDIATE</code> exchanges to carry
+PQuAKE messages - Replace explicit signatures in <code>IKE_AUTH</code> with PQuAKE
+key confirmation<a href="#section-5-3.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-5-4">This results in an implicitly authenticated key exchange, where
+authentication is achieved via shared secret derivation rather than
+explicit signatures.<a href="#section-5-4" class="pilcrow">¶</a></p>
+<p id="section-5-5">This section is <strong>illustrative only</strong>. A complete and interoperable
+integration requires a dedicated specification that defines:<a href="#section-5-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5-6.1">
+          <p id="section-5-6.1.1">Payload formats - Negotiation mechanisms - Transcript binding - Error
+handling and downgrade protection<a href="#section-5-6.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-5-7">Such work is out of scope for this document.<a href="#section-5-7" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="ikeintermediate">
-<section id="section-5.2">
-        <h3 id="name-ike_intermediate">
-<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-ike_intermediate" class="section-name selfRef">IKE_INTERMEDIATE</a>
-        </h3>
-<p id="section-5.2-1">If both peers indicated their support for the Intermediate Exchange,
-the initiator may proceed with the PQuAKE key exchange.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.2-2">
-<pre>
-Initiator                                             Responder
----------------------------------------------------------------
-HDR, SK { PQUAKE_INITIATOR_HELLO } --&gt;
-
-                         &lt;-- HDR, SK { PQUAKE_RESPONDER_HELLO }
-
-HDR, SK { PQUAKE_CERT_EXCHANGE_I } --&gt;
-
-                         &lt;-- HDR, SK { PQUAKE_CERT_EXCHANGE_R }
-
-HDR, SK { PQUAKE_KEY_ENCAP_I } --&gt;
-
-                             &lt;-- HDR, SK { PQUAKE_KEY_ENCAP_R }
-</pre><a href="#section-5.2-2" class="pilcrow">¶</a>
-</div>
+<div id="integration-into-edhoc">
+<section id="section-6">
+      <h2 id="name-integration-into-edhoc">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-integration-into-edhoc" class="section-name selfRef">Integration into EDHOC</a>
+      </h2>
+<p id="section-6-1">PQuAKE can be conceptually integrated into EDHOC by replacing or
+augmenting its authenticated key exchange phase with PQuAKE’s implicit
+authentication mechanism.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">A possible mapping includes:<a href="#section-6-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6-3.1">
+          <p id="section-6-3.1.1">Using EDHOC message_1 / message_2 to carry the ephemeral KEM exchange<a href="#section-6-3.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-3.2">
+          <p id="section-6-3.2.1">Encrypting credentials using the derived ephemeral secret - Embedding
+PQuAKE encapsulation messages into subsequent EDHOC exchanges - Using
+EDHOC exporter interface to derive application keys from the PQuAKE
+session key<a href="#section-6-3.2.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-6-4">This would preserve EDHOC’s compactness while enabling post-quantum
+implicit authentication.<a href="#section-6-4" class="pilcrow">¶</a></p>
+<p id="section-6-5">This is a <strong>proof-of-concept illustration only</strong>. A production-quality
+integration would require a dedicated RFC specifying:<a href="#section-6-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6-6.1">
+          <p id="section-6-6.1.1">Message encoding and transcript construction - Credential formats -
+Interaction with EDHOC authentication methods - Security analysis
+specific to EDHOC composition<a href="#section-6-6.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
 </section>
 </div>
-<div id="ikeauth">
-<section id="section-5.3">
-        <h3 id="name-ike_auth">
-<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-ike_auth" class="section-name selfRef">IKE_AUTH</a>
-        </h3>
-<p id="section-5.3-1">The last pair of messages (IKE_AUTH) authenticate the previous
-messages and establish the first Child SA.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.3-2">
-<pre>
-Initiator                                             Responder
----------------------------------------------------------------
-HDR, SK { PQUAKE_KEY_CONFIRMATION_I } --&gt;
-
-                      &lt;-- HDR, SK { PQUAKE_KEY_CONFIRMATION_R }
-</pre><a href="#section-5.3-2" class="pilcrow">¶</a>
+<div id="integration-into-eap">
+<section id="section-7">
+      <h2 id="name-integration-into-eap">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-integration-into-eap" class="section-name selfRef">Integration into EAP</a>
+      </h2>
+<p id="section-7-1">PQuAKE may be incorporated into the Extensible Authentication Protocol
+(EAP) <span>[<a href="#EAP" class="cite xref">EAP</a>]</span> as a new EAP method.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<p id="section-7-2">In such a design:<a href="#section-7-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7-3.1">
+          <p id="section-7-3.1.1">The PQuAKE exchange would form the EAP authentication conversation -
+Certificates or identities would be transported within EAP payloads -
+The derived session key would be exported via the EAP key hierarchy<a href="#section-7-3.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-7-4">This approach enables post-quantum authenticated key exchange for
+network access scenarios (e.g., Wi-Fi, 5G, enterprise access).<a href="#section-7-4" class="pilcrow">¶</a></p>
+<p id="section-7-5">This is a <strong>proof-of-concept illustration only</strong>. A standards-track
+integration would require a dedicated RFC defining:<a href="#section-7-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7-6.1">
+          <p id="section-7-6.1.1">EAP method type and state machine - Fragmentation and retransmission
+behavior - Key derivation and export interfaces - Interaction with AAA
+infrastructure<a href="#section-7-6.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+</section>
 </div>
+<div id="formal-proofs">
+<section id="section-8">
+      <h2 id="name-formal-proofs">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-formal-proofs" class="section-name selfRef">Formal Proofs</a>
+      </h2>
+<p id="section-8-1">The security properties of PQuAKE have been analyzed using both symbolic
+and computational models, following the methodology developed for
+<span>[<a href="#CAKE-HI" class="cite xref">CAKE-HI</a>]</span>.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<div id="methodology">
+<section id="section-8.1">
+        <h3 id="name-methodology">
+<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-methodology" class="section-name selfRef">Methodology</a>
+        </h3>
+<p id="section-8.1-1">Two independent formal verification frameworks were used:<a href="#section-8.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-8.1-2.1">
+            <p id="section-8.1-2.1.1"><strong>CryptoVerif</strong> (computational model): - Game-based proofs via
+sequence-of-games transformations - Adversary modeled as probabilistic
+polynomial-time (PPT), including quantum adversaries with classical
+oracle access - <strong>Verifpal</strong> (symbolic model): - Active attacker model
+with message modification and replay - Automated reachability and
+secrecy analysis<a href="#section-8.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-8.1-3">These tools provide complementary assurances: CryptoVerif establishes
+computational security under standard assumptions, while Verifpal
+validates protocol logic against a wide class of symbolic attacks.<a href="#section-8.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="proven-security-properties">
+<section id="section-8.2">
+        <h3 id="name-proven-security-properties">
+<a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-proven-security-properties" class="section-name selfRef">Proven Security Properties</a>
+        </h3>
+<p id="section-8.2-1">Under the assumptions listed below, the following properties are
+established:<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-8.2-2.1">
+            <p id="section-8.2-2.1.1"><strong>Secrecy of the session key</strong>: Reduced to IND-CCA2 security of the
+KEM and the random-oracle behavior of KDFs<a href="#section-8.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-8.2-2.2">
+            <p id="section-8.2-2.2.1"><strong>Mutual authentication</strong>: Successful key confirmation implies that
+both parties performed correct decapsulation using their respective
+long-term secret keys<a href="#section-8.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-8.2-2.3">
+            <p id="section-8.2-2.3.1"><strong>Forward secrecy</strong>: Achieved via inclusion of the ephemeral KEM
+shared secret; compromise of long-term keys does not reveal past session
+keys<a href="#section-8.2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-8.2-2.4">
+            <p id="section-8.2-2.4.1"><strong>Key freshness</strong>: Derived keys are indistinguishable from random and
+unique across sessions<a href="#section-8.2-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-8.2-2.5">
+            <p id="section-8.2-2.5.1"><strong>Identity hiding</strong>: Achieved via encryption of certificates under an
+ephemeral shared key, relying on IND-CCA2 encryption and IK-CCA2 KEM
+properties<a href="#section-8.2-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="cryptographic-assumptions">
+<section id="section-8.3">
+        <h3 id="name-cryptographic-assumptions">
+<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-cryptographic-assumptions" class="section-name selfRef">Cryptographic Assumptions</a>
+        </h3>
+<p id="section-8.3-1">The proofs rely on the following assumptions:<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-8.3-2.1">
+            <p id="section-8.3-2.1.1">KEM is <strong>IND-CCA2</strong> and <strong>IK-CCA2</strong> secure - KEM is <strong>implicitly
+rejecting</strong> - KDF behaves as a <strong>random oracle</strong> - HMAC is a
+<strong>pseudorandom function (PRF)</strong> - Hash function (e.g., SHA-384) is
+<strong>collision-resistant</strong> - Domains of KDF invocations are properly
+separated<a href="#section-8.3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="proof-approach-intuition">
+<section id="section-8.4">
+        <h3 id="name-proof-approach-intuition">
+<a href="#section-8.4" class="section-number selfRef">8.4. </a><a href="#name-proof-approach-intuition" class="section-name selfRef">Proof Approach (Intuition)</a>
+        </h3>
+<ul class="normal">
+<li class="normal" id="section-8.4-1.1">
+            <p id="section-8.4-1.1.1">Secrecy and forward secrecy are obtained by replacing KEM-derived
+shared secrets with uniformly random values under IND-CCA2 security,
+then applying random oracle arguments to the KDF.<a href="#section-8.4-1.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-8.4-1.2">
+            <p id="section-8.4-1.2.1">Authentication follows from the fact that successful key confirmation
+requires correct computation of shared secrets derived via decapsulation
+with the corresponding private key.<a href="#section-8.4-1.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-8.4-1.3">
+            <p id="section-8.4-1.3.1">Identity hiding is obtained by combining: - IND-CCA2 security of
+certificate encryption - IK-CCA2 security of the KEM - PRF security of
+HMAC<a href="#section-8.4-1.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="limitations-and-future-work">
+<section id="section-8.5">
+        <h3 id="name-limitations-and-future-work">
+<a href="#section-8.5" class="section-number selfRef">8.5. </a><a href="#name-limitations-and-future-work" class="section-name selfRef">Limitations and Future Work</a>
+        </h3>
+<ul class="normal">
+<li class="normal" id="section-8.5-1.1">
+            <p id="section-8.5-1.1.1">Current proofs rely on the (classical) random oracle model -
+Extensions to the quantum random oracle model (QROM) remain future work<a href="#section-8.5-1.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-8.5-1.2">
+            <p id="section-8.5-1.2.1">Stronger composability guarantees (e.g., UC-security) are not yet
+established<a href="#section-8.5-1.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-8.5-2">Full formal models and proof artifacts are in the process of
+publication.<a href="#section-8.5-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
 </div>
 <div id="security-considerations">
-<section id="section-6">
+<section id="section-9">
       <h2 id="name-security-considerations">
-<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-6-1">This is a security protocol, and it holds the properties described
-in (TODO reference)
-in the presence of passive or active attacker on the network.<a href="#section-6-1" class="pilcrow">¶</a></p>
-<p id="section-6-2">One potential concern is the confidentiality of the peers' identities
-carried in their certificates.
-An active attacker can learn their identities during the certificate
-exchange step.
-Using a pre-shared secret will prevent disclosure of these certificates,
-keeping peers identities confidential.
-Since there are costs associated with out-of-band distribution of
-that secret, it would be typically shared among the Community of
-Interest (CoI). In that case, this protocol would protect peers identities
-against active attackers outside of this Community
-of Interest, but not against an active attacker that is a member
-of CoI.<a href="#section-6-2" class="pilcrow">¶</a></p>
+<p id="section-9-1">This is a security protocol, and it holds the properties described in
+(TODO reference) in the presence of passive or active attacker on the
+network.<a href="#section-9-1" class="pilcrow">¶</a></p>
+<p id="section-9-2">One potential concern is the confidentiality of the peers' identities
+carried in their certificates. An active attacker can learn their
+identities during the certificate exchange step. Using a pre-shared
+secret will prevent disclosure of these certificates, keeping peers
+identities confidential. Since there are costs associated with
+out-of-band distribution of that secret, it would be typically shared
+among the Community of Interest (CoI). In that case, this protocol would
+protect peers identities against active attackers outside of this
+Community of Interest, but not against an active attacker that is a
+member of CoI.<a href="#section-9-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana-considerations">
-<section id="section-7">
+<section id="section-10">
       <h2 id="name-iana-considerations">
-<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-7-1">This document defines a new Notify Message Type in the
-"IKEv2 Notify Message Types - Status Types" registry:<a href="#section-7-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7-2">
-<pre>
-&lt;TBA&gt;   PQUAKE_SUPPORTED
-</pre><a href="#section-7-2" class="pilcrow">¶</a>
-</div>
+<p id="section-10-1">None.<a href="#section-10-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-combined-references">
-<section id="section-8">
+<section id="section-11">
       <h2 id="name-references">
-<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-references" class="section-name selfRef">References</a>
+<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-references" class="section-name selfRef">References</a>
       </h2>
 <div id="sec-normative-references">
-<section id="section-8.1">
+<section id="section-11.1">
         <h3 id="name-normative-references">
-<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+<a href="#section-11.1" class="section-number selfRef">11.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
         </h3>
 <dl class="references">
 <dt id="IKEV2">[IKEV2]</dt>
@@ -2113,18 +2190,150 @@ of CoI.<a href="#section-6-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-informative-references">
-<section id="section-8.2">
+<section id="section-11.2">
         <h3 id="name-informative-references">
-<a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+<a href="#section-11.2" class="section-number selfRef">11.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
+<dt id="BATTARBEE-2025-1228">[BATTARBEE-2025-1228]</dt>
+        <dd>
+<span class="refAuthor">Battarbee, C.</span>, <span class="refAuthor">Striecks, C.</span>, <span class="refAuthor">Perret, L.</span>, <span class="refAuthor">Ramacher, S.</span>, and <span class="refAuthor">K. Verhaeghe</span>, <span class="refTitle">"Quantum-Safe Hybrid Key Exchanges with KEM-Based Authentication"</span>, <span class="seriesInfo">IACR ePrint 2025/1228</span>, <time datetime="2025" class="refDate">2025</time>, <span>&lt;<a href="https://eprint.iacr.org/2025/1228">https://eprint.iacr.org/2025/1228</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="BJM-KA">[BJM-KA]</dt>
+        <dd>
+<span class="refAuthor">Blake-Wilson, S.</span>, <span class="refAuthor">Johnson, D.</span>, and <span class="refAuthor">A. Menezes</span>, <span class="refTitle">"Key Agreement Protocols and Their Security Analysis"</span>, <span class="seriesInfo">DOI 10.1007/BFb0024447</span>, <time datetime="1997-12" class="refDate">December 1997</time>, <span>&lt;<a href="https://doi.org/10.1007/BFb0024447">https://doi.org/10.1007/BFb0024447</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="CAKE-HI">[CAKE-HI]</dt>
+        <dd>
+<span class="refAuthor">Blumenthal, U.</span>, <span class="refAuthor">Itkis, G.</span>, <span class="refAuthor">Khazan, R.</span>, <span class="refAuthor">Luo, B.</span>, <span class="refAuthor">O'Melia, S.</span>, <span class="refAuthor">Proulx, B.</span>, <span class="refAuthor">Stott, D.</span>, <span class="refAuthor">Torres, G.</span>, and <span class="refAuthor">D. A. Wilson</span>, <span class="refTitle">"CAKE-HI - Compact Authenticated Key Exchange Hiding Identities"</span>, <span class="refContent">unpublished manuscript, 14 pp.</span>, <span>n.d.</span>. </dd>
+<dd class="break"></dd>
+<dt id="CHEN-MCELIECE-FPGA">[CHEN-MCELIECE-FPGA]</dt>
+        <dd>
+<span class="refAuthor">Chen, P.</span>, <span class="refTitle">"Complete and Improved FPGA Implementation of Classic McEliece"</span>, <span class="seriesInfo">CHES 2022</span>, <time datetime="2022" class="refDate">2022</time>, <span>&lt;<a href="https://eprint.iacr.org/2022/412">https://eprint.iacr.org/2022/412</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="CLASSIC-MCELIECE">[CLASSIC-MCELIECE]</dt>
+        <dd>
+<span class="refAuthor">Bernstein, D. J.</span>, <span class="refTitle">"Classic McEliece (Round 4)"</span>, <span class="seriesInfo">NIST PQC Round 4</span>, <time datetime="2022-10" class="refDate">October 2022</time>, <span>&lt;<a href="https://classic.mceliece.org">https://classic.mceliece.org</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="EAP">[EAP]</dt>
         <dd>
 <span class="refAuthor">Aboba, B.</span>, <span class="refAuthor">Simon, D.</span>, and <span class="refAuthor">P. Eronen</span>, <span class="refTitle">"Extensible Authentication Protocol (EAP) Key Management Framework"</span>, <span class="seriesInfo">RFC 5247</span>, <span class="seriesInfo">DOI 10.17487/RFC5247</span>, <time datetime="2008-08" class="refDate">August 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5247">https://www.rfc-editor.org/rfc/rfc5247</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="FALCON">[FALCON]</dt>
+        <dd>
+<span class="refAuthor">Fouque, P.</span>, <span class="refAuthor">Hoffstein, J.</span>, <span class="refAuthor">Kirchner, P.</span>, <span class="refAuthor">Lyubashevsky, V.</span>, <span class="refAuthor">Pornin, T.</span>, <span class="refAuthor">Prest, T.</span>, <span class="refAuthor">Ricosset, T.</span>, <span class="refAuthor">Seiler, G.</span>, <span class="refAuthor">Whyte, W.</span>, and <span class="refAuthor">Z. Zhang</span>, <span class="refTitle">"Falcon: Fast-Fourier Lattice-based Compact Signatures over NTRU"</span>, <span class="seriesInfo">NIST PQC Round 3/4 Submission</span>, <time datetime="2020" class="refDate">2020</time>, <span>&lt;<a href="https://falcon-sign.info/falcon.pdf">https://falcon-sign.info/falcon.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="FIPS203">[FIPS203]</dt>
+        <dd>
+<span class="refAuthor">National Institute of Standards and Technology</span>, <span class="refTitle">"Module-Lattice-Based Key-Encapsulation Mechanism Standard"</span>, <span class="seriesInfo">FIPS 203</span>, <time datetime="2024-08" class="refDate">August 2024</time>, <span>&lt;<a href="https://csrc.nist.gov/pubs/fips/203/final">https://csrc.nist.gov/pubs/fips/203/final</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="FIPS204">[FIPS204]</dt>
+        <dd>
+<span class="refAuthor">National Institute of Standards and Technology</span>, <span class="refTitle">"Module-Lattice-Based Digital Signature Standard"</span>, <span class="seriesInfo">FIPS 204</span>, <time datetime="2024-08" class="refDate">August 2024</time>, <span>&lt;<a href="https://csrc.nist.gov/pubs/fips/204/final">https://csrc.nist.gov/pubs/fips/204/final</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="FIPS206">[FIPS206]</dt>
+        <dd>
+<span class="refAuthor">National Institute of Standards and Technology</span>, <span class="refTitle">"FN-DSA (Draft)"</span>, <span class="seriesInfo">FIPS 206 (Draft)</span>, <time datetime="2025" class="refDate">2025</time>, <span>&lt;<a href="https://csrc.nist.gov/pubs/fips/206/ipd">https://csrc.nist.gov/pubs/fips/206/ipd</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="FRONTIERS-PQ-SESSION">[FRONTIERS-PQ-SESSION]</dt>
+        <dd>
+<span class="refTitle">"Design and Implementation of an Authenticated Post-Quantum Session Protocol"</span>, <span class="seriesInfo">Frontiers in Physics 2025</span>, <span class="seriesInfo">DOI 10.3389/fphy.2025.1723966</span>, <time datetime="2025-11" class="refDate">November 2025</time>, <span>&lt;<a href="https://doi.org/10.3389/fphy.2025.1723966">https://doi.org/10.3389/fphy.2025.1723966</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="GAZDAG-IKEV2-PQ">[GAZDAG-IKEV2-PQ]</dt>
+        <dd>
+<span class="refAuthor">Gazdag, S.</span>, <span class="refAuthor">Grundner-Culemann, S.</span>, <span class="refAuthor">Guggemos, T.</span>, <span class="refAuthor">Heider, T.</span>, and <span class="refAuthor">D. Loebenberger</span>, <span class="refTitle">"A Formal Analysis of IKEv2's Post-Quantum Extension"</span>, <span class="seriesInfo">ACSAC 2021</span>, <span class="seriesInfo">DOI 10.1145/3485832.3485885</span>, <time datetime="2021-12" class="refDate">December 2021</time>, <span>&lt;<a href="https://doi.org/10.1145/3485832.3485885">https://doi.org/10.1145/3485832.3485885</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="HALAK-CORTEX-M0">[HALAK-CORTEX-M0]</dt>
+        <dd>
+<span class="refAuthor">Halak, B.</span>, <span class="refTitle">"Benchmarking NIST-Standardized ML-KEM and ML-DSA on ARM Cortex-M0+ (RP2040)"</span>, <span class="seriesInfo">arXiv 2603.19340</span>, <time datetime="2025" class="refDate">2025</time>, <span>&lt;<a href="https://arxiv.org/abs/2603.19340">https://arxiv.org/abs/2603.19340</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="HMQV">[HMQV]</dt>
+        <dd>
+<span class="refAuthor">Krawczyk, H.</span>, <span class="refTitle">"HMQV: A High-Performance Secure Diffie-Hellman Protocol"</span>, <span class="seriesInfo">CRYPTO 2005</span>, <span class="seriesInfo">IACR ePrint 2005/176</span>, <time datetime="2005" class="refDate">2005</time>, <span>&lt;<a href="https://eprint.iacr.org/2005/176">https://eprint.iacr.org/2005/176</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.celi-wiggers-tls-authkem">[I-D.celi-wiggers-tls-authkem]</dt>
+        <dd>
+<span class="refAuthor">Wiggers, T.</span>, <span class="refAuthor">Celi, S.</span>, <span class="refAuthor">Schwabe, P.</span>, <span class="refAuthor">Stebila, D.</span>, and <span class="refAuthor">N. Sullivan</span>, <span class="refTitle">"KEM-based Authentication for TLS 1.3"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-celi-wiggers-tls-authkem-07</span>, <time datetime="2026-05-04" class="refDate">4 May 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-celi-wiggers-tls-authkem-07">https://datatracker.ietf.org/doc/html/draft-celi-wiggers-tls-authkem-07</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ietf-ipsecme-ikev2-mlkem">[I-D.ietf-ipsecme-ikev2-mlkem]</dt>
+        <dd>
+<span class="refAuthor">Kampanakis, P.</span>, <span class="refTitle">"Post-quantum Key Exchange with ML-KEM in the Internet Key Exchange Protocol Version 2 (IKEv2)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-ipsecme-ikev2-mlkem-05</span>, <time datetime="2026-03-14" class="refDate">14 March 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-ipsecme-ikev2-mlkem-05">https://datatracker.ietf.org/doc/html/draft-ietf-ipsecme-ikev2-mlkem-05</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.uri-lake-pquake">[I-D.uri-lake-pquake]</dt>
+        <dd>
+<span class="refAuthor">Blumenthal, U.</span>, <span class="refAuthor">Luo, B.</span>, <span class="refAuthor">O'Melia, S.</span>, <span class="refAuthor">Torres, G.</span>, and <span class="refAuthor">D. A. Wilson</span>, <span class="refTitle">"PQuAKE - Post-Quantum Authenticated Key Exchange"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-uri-lake-pquake-00</span>, <time datetime="2025-04-22" class="refDate">22 April 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-uri-lake-pquake-00">https://datatracker.ietf.org/doc/html/draft-uri-lake-pquake-00</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.wang-ipsecme-kem-auth-ikev2">[I-D.wang-ipsecme-kem-auth-ikev2]</dt>
+        <dd>
+<span class="refAuthor">WANG, G.</span> and <span class="refAuthor">V. Smyslov</span>, <span class="refTitle">"KEM-based Authentication for IKEv2 with Post-quantum Security"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-wang-ipsecme-kem-auth-ikev2-03</span>, <time datetime="2026-03-02" class="refDate">2 March 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-wang-ipsecme-kem-auth-ikev2-03">https://datatracker.ietf.org/doc/html/draft-wang-ipsecme-kem-auth-ikev2-03</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.wiggers-tls-authkem-psk">[I-D.wiggers-tls-authkem-psk]</dt>
+        <dd>
+<span class="refAuthor">Wiggers, T.</span>, <span class="refAuthor">Celi, S.</span>, <span class="refAuthor">Schwabe, P.</span>, <span class="refAuthor">Stebila, D.</span>, and <span class="refAuthor">N. Sullivan</span>, <span class="refTitle">"KEM-based pre-shared-key handshakes for TLS 1.3"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-wiggers-tls-authkem-psk-05</span>, <time datetime="2026-05-04" class="refDate">4 May 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-wiggers-tls-authkem-psk-05">https://datatracker.ietf.org/doc/html/draft-wiggers-tls-authkem-psk-05</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="KEMTLS">[KEMTLS]</dt>
+        <dd>
+<span class="refAuthor">Schwabe, P.</span>, <span class="refAuthor">Stebila, D.</span>, and <span class="refAuthor">T. Wiggers</span>, <span class="refTitle">"Post-Quantum TLS without Handshake Signatures"</span>, <span class="seriesInfo">ACM CCS 2020</span>, <span class="seriesInfo">IACR ePrint 2020/534</span>, <time datetime="2020" class="refDate">2020</time>, <span>&lt;<a href="https://ia.cr/2020/534">https://ia.cr/2020/534</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="KEMTLS-PSK">[KEMTLS-PSK]</dt>
+        <dd>
+<span class="refAuthor">Schwabe, P.</span>, <span class="refAuthor">Stebila, D.</span>, and <span class="refAuthor">T. Wiggers</span>, <span class="refTitle">"More Efficient KEMTLS with Pre-Shared Keys"</span>, <span class="seriesInfo">ESORICS 2021</span>, <span class="seriesInfo">IACR ePrint 2021/779</span>, <time datetime="2021" class="refDate">2021</time>, <span>&lt;<a href="https://ia.cr/2021/779">https://ia.cr/2021/779</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="KEMTLS-TAMARIN">[KEMTLS-TAMARIN]</dt>
+        <dd>
+<span class="refAuthor">Celi, S.</span>, <span class="refAuthor">Hoyland, J.</span>, <span class="refAuthor">Stebila, D.</span>, and <span class="refAuthor">T. Wiggers</span>, <span class="refTitle">"A Tale of Two Models: Formal Verification of KEMTLS in Tamarin"</span>, <span class="seriesInfo">ESORICS 2022</span>, <span class="seriesInfo">IACR ePrint 2022/1111</span>, <time datetime="2022" class="refDate">2022</time>, <span>&lt;<a href="https://ia.cr/2022/1111">https://ia.cr/2022/1111</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="KORANGA-PQC-BENCH">[KORANGA-PQC-BENCH]</dt>
+        <dd>
+<span class="refAuthor">Koranga, A.</span>, <span class="refTitle">"Benchmarking Different PQC Libraries"</span>, <span class="refContent">LinkedIn post</span>, <time datetime="2025" class="refDate">2025</time>, <span>&lt;<a href="https://www.linkedin.com/posts/aditya-koranga_pqc-cupqc-postquantumcryptography-activity-7363632983175548929-dkWs/">https://www.linkedin.com/posts/aditya-koranga_pqc-cupqc-postquantumcryptography-activity-7363632983175548929-dkWs/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="LIBMCELIECE-SPEED">[LIBMCELIECE-SPEED]</dt>
+        <dd>
+<span class="refAuthor">Bernstein, D. J.</span>, <span class="refTitle">"libmceliece speed table"</span>, <time datetime="2025-05-06" class="refDate">6 May 2025</time>, <span>&lt;<a href="https://lib.mceliece.org/speed.html">https://lib.mceliece.org/speed.html</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="LIBOQS">[LIBOQS]</dt>
+        <dd>
+<span class="refAuthor">Open Quantum Safe</span>, <span class="refTitle">"liboqs"</span>, <span>n.d.</span>, <span>&lt;<a href="https://github.com/open-quantum-safe/liboqs">https://github.com/open-quantum-safe/liboqs</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="MCELIECE1978">[MCELIECE1978]</dt>
+        <dd>
+<span class="refAuthor">McEliece, R. J.</span>, <span class="refTitle">"A Public-Key Cryptosystem Based On Algebraic Coding Theory"</span>, <span class="seriesInfo">DSN Progress Report 42-44, JPL, pp. 114-116</span>, <time datetime="1978" class="refDate">1978</time>, <span>&lt;<a href="https://ipnpr.jpl.nasa.gov/progress_report2/42-44/44N.PDF">https://ipnpr.jpl.nasa.gov/progress_report2/42-44/44N.PDF</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="MQV">[MQV]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Law, L.</span>, <span class="refAuthor">Menezes, A.</span>, <span class="refAuthor">Qu, M.</span>, <span class="refAuthor">Solinas, J.</span>, and <span class="refAuthor">S. Vanstone</span>, <span class="refTitle">"An Efficient Protocol for Authenticated Key Agreement"</span>, <span class="seriesInfo">DOI 10.1023/A:1022595222606</span>, <time datetime="1998" class="refDate">1998</time>, <span>&lt;<a href="https://doi.org/10.1023/A:1022595222606">https://doi.org/10.1023/A:1022595222606</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="NIST-SP-800-227">[NIST-SP-800-227]</dt>
+        <dd>
+<span class="refAuthor">National Institute of Standards and Technology</span>, <span class="refTitle">"Recommendation for Key Management: Part 4 - Post-Quantum Cryptography (Draft)"</span>, <span class="seriesInfo">NIST SP 800-227 (Draft)</span>, <time datetime="2025" class="refDate">2025</time>, <span>&lt;<a href="https://csrc.nist.gov/publications/detail/sp/800-227/draft">https://csrc.nist.gov/publications/detail/sp/800-227/draft</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="PQ-CRYSTALS-DILITHIUM">[PQ-CRYSTALS-DILITHIUM]</dt>
+        <dd>
+<span class="refAuthor">CRYSTALS team</span>, <span class="refTitle">"pq-crystals/dilithium (SUPERCOP, KabyLake)"</span>, <span>n.d.</span>, <span>&lt;<a href="https://github.com/pq-crystals/dilithium">https://github.com/pq-crystals/dilithium</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8784">[RFC8784]</dt>
+        <dd>
+<span class="refAuthor">Fluhrer, S.</span>, <span class="refAuthor">Kampanakis, P.</span>, <span class="refAuthor">McGrew, D.</span>, and <span class="refAuthor">V. Smyslov</span>, <span class="refTitle">"Mixing Preshared Keys in the Internet Key Exchange Protocol Version 2 (IKEv2) for Post-quantum Security"</span>, <span class="seriesInfo">RFC 8784</span>, <span class="seriesInfo">DOI 10.17487/RFC8784</span>, <time datetime="2020-06" class="refDate">June 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8784">https://www.rfc-editor.org/rfc/rfc8784</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9370">[RFC9370]</dt>
+        <dd>
+<span class="refAuthor">Tjhai, CJ.</span>, <span class="refAuthor">Tomlinson, M.</span>, <span class="refAuthor">Bartlett, G.</span>, <span class="refAuthor">Fluhrer, S.</span>, <span class="refAuthor">Van Geest, D.</span>, <span class="refAuthor">Garcia-Morchon, O.</span>, and <span class="refAuthor">V. Smyslov</span>, <span class="refTitle">"Multiple Key Exchanges in the Internet Key Exchange Protocol Version 2 (IKEv2)"</span>, <span class="seriesInfo">RFC 9370</span>, <span class="seriesInfo">DOI 10.17487/RFC9370</span>, <time datetime="2023-05" class="refDate">May 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9370">https://www.rfc-editor.org/rfc/rfc9370</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9867">[RFC9867]</dt>
+        <dd>
+<span class="refAuthor">Smyslov, V.</span>, <span class="refTitle">"Mixing Preshared Keys in the IKE_INTERMEDIATE and CREATE_CHILD_SA Exchanges of the Internet Key Exchange Protocol Version 2 (IKEv2) for Post-Quantum Security"</span>, <span class="seriesInfo">RFC 9867</span>, <span class="seriesInfo">DOI 10.17487/RFC9867</span>, <time datetime="2025-11" class="refDate">November 2025</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9867">https://www.rfc-editor.org/rfc/rfc9867</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="SHOR1997">[SHOR1997]</dt>
+        <dd>
+<span class="refAuthor">Shor, P. W.</span>, <span class="refTitle">"Polynomial-Time Algorithms for Prime Factorization and Discrete Logarithms on a Quantum Computer"</span>, <span class="seriesInfo">SIAM J. Comput. vol. 26, no. 5, pp. 1484-1509</span>, <span class="seriesInfo">DOI 10.1137/S0097539795293172</span>, <time datetime="1997" class="refDate">1997</time>, <span>&lt;<a href="https://doi.org/10.1137/S0097539795293172">https://doi.org/10.1137/S0097539795293172</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="WIGGERS-THESIS">[WIGGERS-THESIS]</dt>
+        <dd>
+<span class="refAuthor">Wiggers, T.</span>, <span class="refTitle">"Post-Quantum TLS"</span>, <span class="refContent">Ph.D. Thesis, Radboud University</span>, <time datetime="2024-01" class="refDate">January 2024</time>, <span>&lt;<a href="https://thomwiggers.nl/publication/thesis/">https://thomwiggers.nl/publication/thesis/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="WOLFSSL-BENCH">[WOLFSSL-BENCH]</dt>
+      <dd>
+<span class="refAuthor">wolfSSL</span>, <span class="refTitle">"wolfSSL Benchmark, Appendix G (Intel x86-64, AVX2)"</span>, <span>n.d.</span>, <span>&lt;<a href="https://www.wolfssl.com/documentation/manuals/wolfssl/appendix07.html">https://www.wolfssl.com/documentation/manuals/wolfssl/appendix07.html</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
