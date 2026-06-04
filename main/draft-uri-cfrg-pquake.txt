@@ -5,10 +5,10 @@
 Crypto Forum Research Group                                U. Blumenthal
 Internet-Draft                                                    B. Luo
 Intended status: Informational                                S. O'Melia
-Expires: 3 December 2026                                       G. Torres
+Expires: 6 December 2026                                       G. Torres
                                                                D. Wilson
                                                                      MIT
-                                                             1 June 2026
+                                                             4 June 2026
 
 
             PQuAKE - Post-Quantum Authenticated Key Exchange
@@ -64,7 +64,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 3 December 2026.
+   This Internet-Draft will expire on 6 December 2026.
 
 Copyright Notice
 
@@ -613,7 +613,7 @@ Table of Contents
 6.  Integration into EDHOC
 
    PQuAKE can be conceptually integrated into EDHOC by replacing or
-   augmenting its authenticated key exchange phase with PQuAKE’s
+   augmenting its authenticated key exchange phase with PQuAKE's
    implicit authentication mechanism.
 
    A possible mapping includes:
@@ -626,7 +626,7 @@ Table of Contents
       exchanges - Using EDHOC exporter interface to derive application
       keys from the PQuAKE session key
 
-   This would preserve EDHOC’s compactness while enabling post-quantum
+   This would preserve EDHOC's compactness while enabling post-quantum
    implicit authentication.
 
    This is a *proof-of-concept illustration only*. A production-quality
