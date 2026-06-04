@@ -809,7 +809,7 @@ Such work is out of scope for this document.
 # Integration into EDHOC
 
 PQuAKE can be conceptually integrated into EDHOC by replacing or
-augmenting its authenticated key exchange phase with PQuAKE’s implicit
+augmenting its authenticated key exchange phase with PQuAKE's implicit
 authentication mechanism.
 
 A possible mapping includes:
@@ -820,7 +820,7 @@ PQuAKE encapsulation messages into subsequent EDHOC exchanges - Using
 EDHOC exporter interface to derive application keys from the PQuAKE
 session key
 
-This would preserve EDHOC’s compactness while enabling post-quantum
+This would preserve EDHOC's compactness while enabling post-quantum
 implicit authentication.
 
 This is a **proof-of-concept illustration only**. A production-quality
