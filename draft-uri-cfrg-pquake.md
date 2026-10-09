@@ -64,6 +64,31 @@ normative:
 informative:
   IKEV2: RFC7296
   EDHOC: RFC9528
+  I-D.ietf-lake-authkem-edhoc:
+    title: "KEM-based Authentication for EDHOC"
+    author:
+      - {ins: L. Pocero Fraile, name: Lidia Pocero Fraile}
+      - {ins: C. Koulamas, name: Christos Koulamas}
+      - {ins: A. P. Fournaris, name: Apostolos Fournaris}
+      - {ins: E. Haleplidis, name: Evangelos Haleplidis}
+    date: 2026-09-28
+    seriesinfo:
+      Internet-Draft: draft-ietf-lake-authkem-edhoc-01
+    refcontent: "Work in Progress"
+    target: https://datatracker.ietf.org/doc/html/draft-ietf-lake-authkem-edhoc-01
+  I-D.celi-wiggers-tls-authkem:
+    title: "KEM-based Authentication for TLS 1.3"
+    author:
+      - {ins: T. Wiggers, name: Thom Wiggers}
+      - {ins: S. Celi, name: Sofia Celi}
+      - {ins: P. Schwabe, name: Peter Schwabe}
+      - {ins: D. Stebila, name: Douglas Stebila}
+      - {ins: N. Sullivan, name: Nick Sullivan}
+    date: 2026-05-04
+    seriesinfo:
+      Internet-Draft: draft-celi-wiggers-tls-authkem-07
+    refcontent: "Work in Progress"
+    target: https://datatracker.ietf.org/doc/html/draft-celi-wiggers-tls-authkem-07
   CFRG-PROCESS:
     title: Crypto Forum Research Group Process
     author:
@@ -83,7 +108,27 @@ informative:
       DOI: 10.1023/A:1022595222606
   EAP: RFC5247
   RFC9370:
+  LAKE-CFRG-REQUEST:
+    title: "Request for standardized lightweight quantum-resistant key exchange (on behalf LAKE WG)"
+    author:
+      - {ins: R. Navas, name: Renzo Navas}
+    date: 2026-09-13
+    target: https://mailarchive.ietf.org/arch/msg/lake/BYZ5nAzAmeHCoRo-91_U5e5TL0w/
+  LAKE-CHARTER:
+    title: "Lightweight Authenticated Key Exchange (LAKE) Working Group Charter"
+    author:
+      - {org: "Internet Engineering Task Force"}
+    target: https://datatracker.ietf.org/doc/charter-ietf-lake/
   I-D.wang-ipsecme-kem-auth-ikev2:
+    title: "KEM-based Authentication for IKEv2 with Post-quantum Security"
+    author:
+      - {ins: G. Wang, name: Guilin Wang}
+      - {ins: V. Smyslov, name: Valery Smyslov}
+    date: 2026-07-03
+    seriesinfo:
+      Internet-Draft: draft-wang-ipsecme-kem-auth-ikev2-04
+    refcontent: "Work in Progress"
+    target: https://datatracker.ietf.org/doc/html/draft-wang-ipsecme-kem-auth-ikev2-04
   FIPS203:
     title: "Module-Lattice-Based Key-Encapsulation Mechanism Standard"
     author:
@@ -188,7 +233,9 @@ informative:
     date: 2025
     seriesinfo:
       "IACR ePrint": "2025/1228"
-    target: https://eprint.iacr.org/2025/1228
+      "EPJ Quantum Technology": "12, article 128"
+      DOI: 10.1140/epjqt/s40507-025-00425-3
+    target: https://doi.org/10.1140/epjqt/s40507-025-00425-3
   KYBER-ANONYMITY:
     title: "Post-Quantum Anonymity of Kyber"
     author:
@@ -230,9 +277,11 @@ post-quantum handshake signatures may reduce communication or computation.
 An optional pre-shared secret is intended to protect encrypted credentials
 against active outsiders.
 
-The intended Informational document provides a reference construction,
-its design rationale, assumptions, security intuition, and conditions for
-safe use. Formal analyses reported for the closely related CAKE-HI
+The goal is to specify a compact reference construction and obtain CFRG
+review of its security and applicability, with a view to a favorable
+assessment and publication as an Informational RFC if the review supports
+it. The document presents the design rationale, assumptions, security
+intuition, and conditions for safe use. Formal analyses reported for the closely related CAKE-HI
 construction are relevant evidence; their applicability to this draft's
 precise messages and algorithms remains to be established. Protocol-specific
 integration, performance comparisons, and unresolved specification details
@@ -295,26 +344,78 @@ future work. The paper's constrained-link use cases and these comparisons
 support further evaluation, but do not constitute a working-group request
 for PQuAKE.
 
+## Evidence of Protocol Interest
+
+KEM-based authentication addresses an active protocol-design problem.
+LAKE has adopted {{I-D.ietf-lake-authkem-edhoc}} as a working-group document
+for KEM-based authentication in EDHOC. The individual TLS proposal
+{{I-D.celi-wiggers-tls-authkem}} specifies authentication with long-term
+KEM public keys. These efforts establish practical interest in the broader
+approach and provide protocol-specific alternatives for comparison.
+
+There is also an explicit, broader working-group request to CFRG.
+On September 13, 2026, Renzo Navas wrote on behalf of LAKE, requesting
+research and specification of lightweight quantum-resistant key-exchange
+algorithms {{LAKE-CFRG-REQUEST}}. The request identifies message-size
+constraints and seeks smaller NIKE and KEM alternatives, with LAKE offering
+to evaluate candidates. It establishes demand for cryptographic work
+supporting constrained authenticated key exchange. It does not specifically
+request review of AuthKEM or PQuAKE, and does not establish that PQuAKE's
+proposed ML-KEM suite meets the most constrained environments' requirements.
+
+The individual IKEv2 proposal {{I-D.wang-ipsecme-kem-auth-ikev2}} provides
+more specific evidence for PQuAKE: it explicitly incorporates PQuAKE's
+ideas, aligns its exchange sequence, and cites PQuAKE for authentication
+details. This is a concrete proposed application of the construction.
+An explicit working-group request for CFRG to review PQuAKE, if made,
+should be cited separately. The protocol efforts above retain their own
+designs and security analyses; this document seeks review of PQuAKE itself.
+
+The absence of a construction-specific request should not, by itself, be
+interpreted as absence of demand for KEM-based authentication. A working
+group may draw on participating cryptographers, published analyses, and
+existing research when developing its protocol, and may direct a CFRG
+request toward gaps in the available primitives rather than toward review
+of every integration. It may also seek additional review later as a
+design matures. These are plausible explanations, not documented motives
+of LAKE or another working group. LAKE's charter explicitly welcomes formal
+analysis of cryptographically relevant protocol changes {{LAKE-CHARTER}};
+that does not establish that a proof of its current AuthKEM specification
+is complete or that the group regards such a proof as replacing CFRG review.
+
+Formal proofs and broader cryptographic review serve complementary purposes.
+A proof establishes specified properties under its model and assumptions;
+review can assess whether those properties, assumptions, and their mapping
+to the specification cover the intended use. PQuAKE therefore seeks a
+shared assessment of a reusable construction and its safe-use conditions,
+even where an integrating working group has substantial local expertise.
+
 ## Scope and Publication Objective
 
-The objective is an Informational reference for the PQuAKE construction:
-what problem it addresses, why its components are combined this way, which
-security claims are supported by analysis, and what is required to use it
-securely. It is a candidate building block for higher-level protocols,
-subject to their own design and analysis. It does not specify a record
-layer, application authorization, a universal key schedule for other
-protocols, or general best-practice guidance for KEM authentication.
+The primary objective is to define a compact KEM-based authenticated
+key-exchange construction and obtain CFRG's assessment of its cryptographic
+design, security arguments, and conditions for safe use. If review
+substantiates the claims and the open issues are resolved, the authors
+seek a favorable assessment of the construction and publication of the
+reviewed specification as an Informational RFC.
+
+The intended result is a reviewed building block for higher-level
+protocols, accompanied by a stable public reference. It should establish
+why the construction is suitable for its stated uses and which assumptions
+and limits an integration must respect. Each integrating protocol still
+requires its own message mapping, key schedule, and security analysis.
+Record-layer design and application authorization are outside this scope.
 
 The CFRG process {{CFRG-PROCESS}} asks proposals to establish practical
 relevance and research support. This revision identifies related
 constructions and the remaining analysis and interoperability work.
-No explicit request from an IETF working group to adopt or depend on
-PQuAKE is documented here. Related work demonstrates interest in KEM
-authentication, but does not establish demand for this particular exchange.
-A future revision should cite concrete requirements and requests if they
-become available. Publication as a stable reference for external use is
-also a possible objective; the appropriate publication stream remains an
-open process question. This document does not presume CFRG adoption.
+The protocol interest described above supports that review objective.
+A stable reference for external use would also be valuable, but the
+authors' request includes cryptographic assessment of a construction
+intended for protocol integration. The appropriate publication stream
+remains a process question to resolve with the group and chairs. The
+requested favorable assessment is an objective, not a statement that
+CFRG has already adopted or approved PQuAKE.
 
 ## Design Rationale and Related Work
 
@@ -334,25 +435,6 @@ Classical discrete-logarithm assumptions do not give post-quantum security.
 The distinction between possessing a key, authenticating an identity, and
 confirming a particular session also matters here {{BJM-KA}}.
 
-KEMTLS {{KEMTLS}} replaces online TLS handshake signatures with
-KEM-based authentication. It supplies a protocol-specific construction and
-analysis against which PQuAKE should be compared. KEMTLS-PDK
-{{KEMTLS-PDK}} instead exploits pre-distributed public keys to change the
-communication and latency trade-offs. Pre-distributed public keys are
-different from PQuAKE's optional symmetric secret for credential hiding.
-Neither construction's security proof transfers automatically to PQuAKE.
-The Tamarin analyses of KEMTLS {{KEMTLS-TAMARIN}} further illustrate why
-both the modeled message flow and the precise security definitions matter.
-
-Muckle# {{BATTARBEE-2025-1228}} studies KEM authentication in a hybrid
-key-exchange framework, combining contributions from different types of
-key establishment. PQuAKE's three KEM secrets are not by themselves a
-claim of hybrid security if one algorithm fails. CKAKE {{CKAKE}} presents
-a KEM-authenticated construction with a composable proof in Constructive
-Cryptography. It is another relevant comparator, particularly for
-composition and forward secrecy; this draft makes no comparable
-composability claim.
-
 CAKE-HI {{CAKE-HI}} is the closely related construction for which the
 authors report CryptoVerif and Verifpal analyses. Its relationship to the
 specific PQuAKE encoding, key schedule, and acceptance rules must be made
@@ -362,6 +444,85 @@ exchange of certified KEM credentials, mutual static-key encapsulation,
 and optional credential hiding against active outsiders using a
 pre-shared secret. This description is not a claim of novelty or superiority
 over the related work.
+
+### Trade-offs of Comparable Constructions {#comparative-tradeoffs}
+
+The alternatives below address overlapping KEM-authentication needs, but
+differ in authentication direction, setup, message flow, and proof model.
+KEMTLS and KEMTLS-PDK have conference publications; Muckle# has a journal
+publication. CKAKE and CAKE-HI are public research preprints. Publication
+of a construction is distinct from standardization of an integrated protocol.
+
+- **KEMTLS:** {{KEMTLS}} removes online TLS handshake signatures while
+  retaining signed certificates for long-term KEM keys. It permits the
+  client to send application data after one round trip, under implicit
+  server authentication; explicit authentication requires a later
+  confirmation. The paper identifies weaker forward-secrecy and downgrade
+  guarantees at that early stage than after handshake completion. Its
+  certificate-based client-authentication extension adds a round trip
+  {{KEMTLS-PDK}}. Thus early data availability, completion of authentication,
+  and mutual authentication have different latency costs. Its TLS-specific
+  key schedule and multistage analysis supply integration detail that a
+  generic construction must provide separately. The Tamarin analyses
+  {{KEMTLS-TAMARIN}} also show why message flow and security definitions
+  must be compared precisely.
+
+- **KEMTLS-PDK:** {{KEMTLS-PDK}} exploits an authentic server public key
+  installed, cached, or obtained out of band. It reduces online bandwidth
+  and computation, and completes client authentication one round trip
+  sooner than ordinary KEMTLS. Large-public-key, small-ciphertext KEMs
+  become more attractive when the public key need not cross the link in
+  each handshake. The operational trade-off is the need to obtain and
+  maintain authentic keys before using this path: provisioning, cache
+  misses, and key updates belong in the deployment comparison. Those
+  operational consequences are inferred from its setup requirement.
+  Public-key pre-distribution is different from PQuAKE's optional symmetric
+  secret, which is used for credential hiding against active outsiders.
+
+- **Muckle#:** {{BATTARBEE-2025-1228}} combines conventional,
+  post-quantum, and QKD-derived key material in a hybrid authenticated
+  key-exchange framework, using KEM authentication in place of online
+  signatures. Its journal version reports an additional initiator message
+  relative to TLS 1.3 and makes the initiator the first party able to send
+  encrypted data. Hybrid sources offer a different security objective,
+  with corresponding primitive and key-management requirements; a QKD
+  deployment also needs access to QKD key services. The reported prototype
+  uses simulated QKD, and certificates dominate its measured bandwidth.
+  These conditions prevent directly transferring those measurements to
+  PQuAKE. PQuAKE's three ML-KEM secrets do not establish resilience to
+  failure of ML-KEM itself.
+
+- **CKAKE:** {{CKAKE}} provides KEM authentication, forward secrecy, and
+  a composable proof in Constructive Cryptography. Its server-initiated
+  exchange takes one and a half round trips; pre-distributing the server
+  public key permits explicitly authenticated data after one round trip.
+  Its modeled goal authenticates the server to clients rather than
+  establishing PQuAKE's intended mutual credential authentication.
+  The paper's bandwidth comparison counts cryptographic objects and the
+  server public key, excluding certificate metadata and signatures.
+  It reports slightly smaller totals than KEMTLS with ML-KEM, so
+  composability must not be presumed to impose a bandwidth penalty.
+  Its setup resources and guarantees require comparison with an
+  integration's needs. This draft does not claim a composable proof.
+
+PQuAKE targets mutual authentication with exchanged certified KEM keys and
+optional protection of credentials against active outsiders. Its costs
+include both credential payloads, static-key encapsulations and
+decapsulations, confirmation traffic, and, for active hiding, provisioning
+and protection of a symmetric secret. Removing online handshake signatures
+does not remove certificate signatures or their validation cost. The
+CAKE-HI analysis {{CAKE-HI}} is relevant evidence, subject to the model
+and specification limits in {{security-analysis}}; it is not an independent
+alternative demonstrating that PQuAKE outperforms the constructions above.
+
+A quantitative comparison must hold the algorithm security level,
+authentication direction, certificate-chain and caching assumptions, and
+required authentication and forward-secrecy stage constant. It must count
+complete encoded messages, fragmentation and transport overhead, and
+distinguish earliest application data from completed key confirmation.
+Without such a comparison, this document claims a candidate compact
+construction for review, not a measured bandwidth, latency, or energy
+advantage over every alternative.
 
 ## Security Goals and Component Requirements
 
@@ -842,9 +1003,14 @@ and the derivation of IKE and Child SA keys. Negotiation, downgrade
 protection, fragmentation, retransmission, and failure handling require a
 dedicated specification. RFC 9370 {{RFC9370}} concerns multiple key
 exchanges in IKEv2; it does not by itself define PQuAKE authentication.
-Existing KEM-authentication work such as
-{{I-D.wang-ipsecme-kem-auth-ikev2}} is a separate proposal, not an
-endorsement of or dependency on PQuAKE.
+The individual proposal {{I-D.wang-ipsecme-kem-auth-ikev2}} provides a
+concrete example of applying PQuAKE's approach to IKEv2. Its change log
+states that version 02 incorporated PQuAKE's ideas and version 04 aligned
+the exchange sequence with PQuAKE; Section 5 refers to PQuAKE for further
+details of KEM-based authentication. This demonstrates interest in using
+the construction in a protocol-specific design. Its IKEv2 message formats,
+key schedule, and security analysis remain the responsibility of that
+integration specification.
 
 ## EDHOC
 

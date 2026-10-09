@@ -22,11 +22,21 @@ author input or cryptographic review.
 
 ## Nick Sullivan and John Preuß Mattsson
 
+- Made the primary objective explicit: define a compact KEM-based AKE
+  construction, seek CFRG review and a favorable cryptographic assessment
+  if substantiated, and publish the reviewed building block as an
+  Informational RFC. A stable reference is a result of that work.
+- Added "Evidence of Protocol Interest," citing LAKE's adopted EDHOC
+  KEM-authentication document, the individual TLS proposal, and the IKEv2
+  proposal's explicit use of PQuAKE's ideas. Broad protocol demand and a
+  specific working-group request for CFRG review are distinguished.
 - Stated the intended Informational reference/building-block objective,
   proposed constrained-link use case, and criteria for a fair comparison.
-- Distinguished related KEM-authentication work from explicit demand for
-  PQuAKE. No requesting working group or deployment evidence was supplied
-  in the email chain; the draft says no such request is documented here.
+- Identified the IKEv2 KEM-authentication proposal as concrete evidence of
+  interest in adapting PQuAKE: its version 02 change log incorporates
+  PQuAKE's ideas, version 04 aligns its exchange sequence, and Section 5
+  refers to PQuAKE. Working-group adoption or a formal request for CFRG
+  review should be supported by the corresponding decision or request.
 - Cited the CFRG process and left the publication stream open. The edit
   does not change the individual draft's submission metadata or imply
   adoption, consensus, or endorsement.
@@ -95,10 +105,46 @@ energy, or integrated-protocol latency. Section 8 identifies empirical
 integrated-protocol measurements as future work.
 
 Further input is needed for specific deployment requirements or explicit
-working-group requests. The paper supplies candidate use cases and a
-comparison, but does not establish such a request for PQuAKE.
+working-group requests to review PQuAKE itself. The paper supplies candidate use cases and a
+comparison. The individual IKEv2 proposal supplies explicit interest in
+adapting PQuAKE; its relationship is documented in the revised scope and
+IKEv2 integration discussions.
+
+The earlier wording describing that draft as a separate proposal with no
+endorsement or dependency understated this relationship. It was corrected
+after checking version 04's change log and Section 5 against the public
+draft, following the author's question.
 
 ## Validation
+
+The explanation of working-group interest now cites LAKE's September 13,
+2026 request to CFRG, sent by Renzo Navas on behalf of the WG. It seeks
+smaller quantum-resistant NIKE and KEM algorithms, not review or adoption
+of PQuAKE specifically. This is explicit evidence of broader WG demand
+and updates the earlier discussion that had only identified adopted drafts.
+The LAKE charter welcomes formal analysis. Local expertise, existing
+research, and the timing or scope of review requests are described as
+possible explanations for the absence of a construction-specific request;
+no undocumented motive or completed AuthKEM proof is attributed to LAKE.
+The draft explains why formal proofs and broader review are complementary.
+
+The comparable-constructions discussion now answers Nick Sullivan's
+trade-off question explicitly: KEMTLS's early implicit authentication and
+later confirmation, KEMTLS-PDK's authenticated key pre-distribution,
+Muckle#'s hybrid sources and message/key-service requirements, and CKAKE's
+composable server-authentication model and server-initiated flow. The
+discussion also states PQuAKE's own credential, KEM, confirmation, and
+optional symmetric-secret costs and the controls needed for a fair
+quantitative comparison.
+
+Sources checked for this addition were KEMTLS's March 15, 2022 full version
+(introductory discussion and multistage model), KEMTLS-PDK's public paper
+abstract, Muckle#'s journal version (Section 4, published November 10, 2025),
+and CKAKE's February 2026 preprint (setup resources and Section 4 bandwidth
+and round-trip comparison). Muckle#'s bibliography entry now includes the
+verified journal publication and DOI. Operational maintenance implications
+of pre-distributed public keys are identified as inference. No numerical
+ranking across differently scoped papers is asserted.
 
 The final `make latest lint` build passed with the existing local toolchain
 and a bibliography cache under `/private/tmp/pquake-refcache`. HTML and
