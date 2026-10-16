@@ -1,0 +1,1554 @@
+
+
+
+
+Crypto Forum Research Group                                U. Blumenthal
+Internet-Draft                                                    B. Luo
+Intended status: Informational                                S. O'Melia
+Expires: 19 April 2027                                         G. Torres
+                                                               D. Wilson
+                                                                     MIT
+                                                         16 October 2026
+
+
+            PQuAKE - Post-Quantum Authenticated Key Exchange
+                      draft-uri-cfrg-pquake-latest
+
+Abstract
+
+   This document describes Post-Quantum Authenticated Key Exchange
+   (PQuAKE), a proposed construction for mutual authentication using an
+   ephemeral key-encapsulation mechanism (KEM) exchange, encapsulations
+   to certified long-term KEM keys, transcript binding, and explicit key
+   confirmation.  Its target use case is a constrained link where
+   avoiding online post-quantum handshake signatures may reduce
+   communication or computation.  An optional pre-shared secret is
+   intended to protect encrypted credentials against active outsiders.
+
+   The goal is to specify a compact reference construction and obtain
+   CFRG review of its security and applicability, with a view to a
+   favorable assessment and publication as an Informational RFC if the
+   review supports it.  The document presents the design rationale,
+   assumptions, security intuition, and conditions for safe use.  Formal
+   analyses reported for the closely related CAKE-HI construction are
+   relevant evidence; their applicability to this draft's precise
+   messages and algorithms remains to be established.  Protocol-specific
+   integration, performance comparisons, and unresolved specification
+   details are identified separately.  This individual proposal does not
+   represent CFRG consensus or a recommendation to an IETF working
+   group.
+
+About This Document
+
+   This note is to be removed before publishing as an RFC.
+
+   The latest revision of this draft can be found at
+   https://mouse07410.github.io/pquake-draft/draft-uri-cfrg-pquake.html.
+   Status information for this document may be found at
+   https://datatracker.ietf.org/doc/draft-uri-cfrg-pquake/.
+
+   Discussion of this document takes place on the Crypto Forum Research
+   Group Research Group mailing list (mailto:cfrg@irtf.org), which is
+   archived at https://mailarchive.ietf.org/arch/browse/cfrg/.
+   Subscribe at https://www.ietf.org/mailman/listinfo/cfrg/.
+
+   Source for this draft and an issue tracker can be found at
+   https://github.com/mouse07410/pquake-draft.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 19 April 2027.
+
+Copyright Notice
+
+   Copyright (c) 2026 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.
+
+Table of Contents
+
+   1.  Introduction
+     1.1.  Problem Statement and Intended Use
+     1.2.  Evidence of Protocol Interest
+     1.3.  Scope and Publication Objective
+     1.4.  Design Rationale and Related Work
+       1.4.1.  Trade-offs of Comparable Constructions
+     1.5.  Security Goals and Component Requirements
+     1.6.  Proposed Version 1 Algorithm Suite
+   2.  Conventions and Definitions
+   3.  Protocol Description
+     3.1.  Protocol Diagram
+     3.2.  Exchange certificates
+       3.2.1.  Key Derivation of k_hid with preshared secret
+       3.2.2.  Key Derivation of k_hid without preshared secret
+       3.2.3.  Initiator
+       3.2.4.  Responder
+     3.3.  Encapsulate shared secrets
+       3.3.1.  Initiator
+       3.3.2.  Responder
+     3.4.  Decapsulate ciphertexts and key derivation
+       3.4.1.  Initiator
+       3.4.2.  Responder
+     3.5.  Key Confirmation
+     3.6.  Error Handling
+   4.  Protocol Messages
+     4.1.  Message Format
+     4.2.  Hello Messages
+       4.2.1.  Initiator Hello
+       4.2.2.  Responder Hello
+     4.3.  Certificate Exchange
+     4.4.  Certificate Format
+     4.5.  Encapsulation
+     4.6.  Key Confirmation
+   5.  Initial Considerations for Protocol Integration
+     5.1.  IKEv2
+     5.2.  EDHOC
+     5.3.  EAP
+   6.  Security Analysis and Formal Evidence
+     6.1.  Evidence and Model Scope
+     6.2.  Primitive Assumptions in the Reported Computational
+           Analysis
+     6.3.  Relationship to the PQuAKE Specification
+     6.4.  Threat Model and Assumptions
+     6.5.  Session-Key Secrecy and Forward Secrecy: Intuition
+     6.6.  Mutual Authentication and Key Confirmation: Intuition
+     6.7.  Transcript Binding, Freshness, and Replay: Intuition
+     6.8.  Identity Privacy: Intuition and Limits
+     6.9.  Limits of the Analysis
+   7.  Security Considerations
+     7.1.  Credential Validation and Authorization
+     7.2.  Key Lifecycle and Randomness
+     7.3.  Input Handling and Resource Limits
+     7.4.  Specification Work Required Before Interoperable Use
+   8.  IANA Considerations
+   9.  References
+     9.1.  Normative References
+     9.2.  Informative References
+   Acknowledgments
+   Authors' Addresses
+
+1.  Introduction
+
+   PQuAKE explores mutual authentication without generating a fresh
+   digital signature over each handshake.  Each party presents a
+   certificate binding its identity to a long-term KEM public key.
+   Encapsulations to those keys contribute secrets to the final key
+   derivation, and each party confirms possession of the derived key
+   using a message authentication code (MAC).  Certificate signatures
+   still require validation; avoiding online handshake signatures does
+   not remove the need for an authenticated trust mechanism.
+
+1.1.  Problem Statement and Intended Use
+
+   The target problem is establishing fresh, mutually authenticated
+   session keys on links where the bandwidth, energy, or implementation
+   cost of post-quantum handshake signatures matters.  Candidate
+   applications include constrained devices with provisioned trust
+   anchors and repeated connections to peers with certified KEM keys.
+   The additional KEM ciphertexts, certificate chains, and message
+   flights also have costs.  PQuAKE is useful only where those costs are
+   acceptable relative to the alternatives.
+
+   This is a proposed use case, not evidence that every constrained
+   deployment needs a new AKE construction.  Algorithm choice,
+   credential caching, fragmentation, loss, latency, and certificate
+   verification can change the trade-off.  A comparison must include
+   both peers' complete transmitted credentials, all ciphertexts and
+   confirmation values, round trips, memory, and measured computation
+   and energy on the target platform.  This document does not yet
+   provide a deployment-specific comparison of PQuAKE or claim a
+   universal bandwidth or power advantage.
+
+   Section 7 and Appendix Table 4 of [CAKE-HI] give the following
+   handshake byte counts for its comparison with mutually authenticated
+   TLS 1.3 using Kyber-1024.  The row labels retain the paper's
+   algorithm names.
+
+    +=======================+=========+======+============+===========+
+    | Certificate-signature | CAKE-HI |  mTLS| Difference | Reduction |
+    | row                   |  octets |octets|            |  relative |
+    |                       |         |      |            |   to mTLS |
+    +=======================+=========+======+============+===========+
+    | Dilithium5            |  19,398 |27,984|      8,586 |     30.7% |
+    +-----------------------+---------+------+------------+-----------+
+    | FALCON1024            |  12,768 |21,354|      8,586 |     40.2% |
+    +-----------------------+---------+------+------------+-----------+
+
+                                  Table 1
+
+   The percentages above are calculated as the difference divided by the
+   mTLS total.  They are not the 44.2% figure in the paper's prose,
+   which corresponds to dividing 8,586 by the smaller 19,398 total.  The
+   comparison assumes the paper's message flows and estimated
+   certificates; it is not a measurement of this draft with standardized
+   ML-KEM and ML-DSA encodings.
+
+   Appendix Table 3 compares cryptographic operation counts: each CAKE-
+   HI peer replaces an online signature generation with an additional
+   static KEM encapsulation and decapsulation.  Both designs still
+   validate certificate signatures.  This is evidence about the
+   computational workload, not measured device energy or end-to-end
+   latency.  Section 8 identifies empirical testing in integrated
+   protocols under bandwidth constraints as future work.  The paper's
+   constrained-link use cases and these comparisons support further
+   evaluation, but do not constitute a working-group request for PQuAKE.
+
+1.2.  Evidence of Protocol Interest
+
+   KEM-based authentication addresses an active protocol-design problem.
+   LAKE has adopted [I-D.ietf-lake-authkem-edhoc] as a working-group
+   document for KEM-based authentication in EDHOC.  The individual TLS
+   proposal [I-D.celi-wiggers-tls-authkem] specifies authentication with
+   long-term KEM public keys.  These efforts establish practical
+   interest in the broader approach and provide protocol-specific
+   alternatives for comparison.
+
+   There is also an explicit, broader working-group request to CFRG.  On
+   September 13, 2026, Renzo Navas wrote on behalf of LAKE, requesting
+   research and specification of lightweight quantum-resistant key-
+   exchange algorithms [LAKE-CFRG-REQUEST].  The request identifies
+   message-size constraints and seeks smaller NIKE and KEM alternatives,
+   with LAKE offering to evaluate candidates.  It establishes demand for
+   cryptographic work supporting constrained authenticated key exchange.
+   It does not specifically request review of AuthKEM or PQuAKE, and
+   does not establish that PQuAKE's proposed ML-KEM suite meets the most
+   constrained environments' requirements.
+
+   The individual IKEv2 proposal [I-D.wang-ipsecme-kem-auth-ikev2]
+   provides more specific evidence for PQuAKE: it explicitly
+   incorporates PQuAKE's ideas, aligns its exchange sequence, and cites
+   PQuAKE for authentication details.  This is a concrete proposed
+   application of the construction.  An explicit working-group request
+   for CFRG to review PQuAKE, if made, should be cited separately.  The
+   protocol efforts above retain their own designs and security
+   analyses; this document seeks review of PQuAKE itself.
+
+   The absence of a construction-specific request should not, by itself,
+   be interpreted as absence of demand for KEM-based authentication.  A
+   working group may draw on participating cryptographers, published
+   analyses, and existing research when developing its protocol, and may
+   direct a CFRG request toward gaps in the available primitives rather
+   than toward review of every integration.  It may also seek additional
+   review later as a design matures.  These are plausible explanations,
+   not documented motives of LAKE or another working group.  LAKE's
+   charter explicitly welcomes formal analysis of cryptographically
+   relevant protocol changes [LAKE-CHARTER]; that does not establish
+   that a proof of its current AuthKEM specification is complete or that
+   the group regards such a proof as replacing CFRG review.
+
+   Formal proofs and broader cryptographic review serve complementary
+   purposes.  A proof establishes specified properties under its model
+   and assumptions; review can assess whether those properties,
+   assumptions, and their mapping to the specification cover the
+   intended use.  PQuAKE therefore seeks a shared assessment of a
+   reusable construction and its safe-use conditions, even where an
+   integrating working group has substantial local expertise.
+
+1.3.  Scope and Publication Objective
+
+   The primary objective is to define a compact KEM-based authenticated
+   key-exchange construction and obtain CFRG's assessment of its
+   cryptographic design, security arguments, and conditions for safe
+   use.  If review substantiates the claims and the open issues are
+   resolved, the authors seek a favorable assessment of the construction
+   and publication of the reviewed specification as an Informational
+   RFC.
+
+   The intended result is a reviewed building block for higher-level
+   protocols, accompanied by a stable public reference.  It should
+   establish why the construction is suitable for its stated uses and
+   which assumptions and limits an integration must respect.  Each
+   integrating protocol still requires its own message mapping, key
+   schedule, and security analysis.  Record-layer design and application
+   authorization are outside this scope.
+
+   The CFRG process [CFRG-PROCESS] asks proposals to establish practical
+   relevance and research support.  This revision identifies related
+   constructions and the remaining analysis and interoperability work.
+   The protocol interest described above supports that review objective.
+   A stable reference for external use would also be valuable, but the
+   authors' request includes cryptographic assessment of a construction
+   intended for protocol integration.  The appropriate publication
+   stream remains a process question to resolve with the group and
+   chairs.  The requested favorable assessment is an objective, not a
+   statement that CFRG has already adopted or approved PQuAKE.
+
+1.4.  Design Rationale and Related Work
+
+   The construction separates three tasks.  An ephemeral KEM exchange
+   provides an initial secret and is intended to support forward
+   secrecy.  Encryption under a key derived from that secret protects
+   the credentials against passive observers.  Two encapsulations to
+   certified static KEM keys add contributions that require the
+   corresponding private keys to recover.  Transcript binding and
+   separate confirmation keys tie those contributions to the exchange
+   and each peer's role.  The security intuition and its conditions are
+   developed in Section 6.
+
+   MQV [MQV] and HMQV [HMQV] are historical examples of authentication
+   through key agreement with static and ephemeral keys.  PQuAKE borrows
+   that high-level objective, not their algebraic construction or
+   security proofs.  Classical discrete-logarithm assumptions do not
+   give post-quantum security.  The distinction between possessing a
+   key, authenticating an identity, and confirming a particular session
+   also matters here [BJM-KA].
+
+   CAKE-HI [CAKE-HI] is the closely related construction for which the
+   authors report CryptoVerif and Verifpal analyses.  Its relationship
+   to the specific PQuAKE encoding, key schedule, and acceptance rules
+   must be made explicit before those results support claims about this
+   specification.  The distinctive combination proposed for review here
+   is a symmetric exchange of certified KEM credentials, mutual static-
+   key encapsulation, and optional credential hiding against active
+   outsiders using a pre-shared secret.  This description is not a claim
+   of novelty or superiority over the related work.
+
+1.4.1.  Trade-offs of Comparable Constructions
+
+   The alternatives below address overlapping KEM-authentication needs,
+   but differ in authentication direction, setup, message flow, and
+   proof model.  KEMTLS and KEMTLS-PDK have conference publications;
+   Muckle# has a journal publication.  CKAKE and CAKE-HI are public
+   research preprints.  Publication of a construction is distinct from
+   standardization of an integrated protocol.
+
+   *  *KEMTLS:* [KEMTLS] removes online TLS handshake signatures while
+      retaining signed certificates for long-term KEM keys.  It permits
+      the client to send application data after one round trip, under
+      implicit server authentication; explicit authentication requires a
+      later confirmation.  The paper identifies weaker forward-secrecy
+      and downgrade guarantees at that early stage than after handshake
+      completion.  Its certificate-based client-authentication extension
+      adds a round trip [KEMTLS-PDK].  Thus early data availability,
+      completion of authentication, and mutual authentication have
+      different latency costs.  Its TLS-specific key schedule and
+      multistage analysis supply integration detail that a generic
+      construction must provide separately.  The Tamarin analyses
+      [KEMTLS-TAMARIN] also show why message flow and security
+      definitions must be compared precisely.
+
+   *  *KEMTLS-PDK:* [KEMTLS-PDK] exploits an authentic server public key
+      installed, cached, or obtained out of band.  It reduces online
+      bandwidth and computation, and completes client authentication one
+      round trip sooner than ordinary KEMTLS.  Large-public-key, small-
+      ciphertext KEMs become more attractive when the public key need
+      not cross the link in each handshake.  The operational trade-off
+      is the need to obtain and maintain authentic keys before using
+      this path: provisioning, cache misses, and key updates belong in
+      the deployment comparison.  Those operational consequences are
+      inferred from its setup requirement.  Public-key pre-distribution
+      is different from PQuAKE's optional symmetric secret, which is
+      used for credential hiding against active outsiders.
+
+   *  *Muckle#:* [BATTARBEE-2025-1228] combines conventional, post-
+      quantum, and QKD-derived key material in a hybrid authenticated
+      key-exchange framework, using KEM authentication in place of
+      online signatures.  Its journal version reports an additional
+      initiator message relative to TLS 1.3 and makes the initiator the
+      first party able to send encrypted data.  Hybrid sources offer a
+      different security objective, with corresponding primitive and
+      key-management requirements; a QKD deployment also needs access to
+      QKD key services.  The reported prototype uses simulated QKD, and
+      certificates dominate its measured bandwidth.  These conditions
+      prevent directly transferring those measurements to PQuAKE.
+      PQuAKE's three ML-KEM secrets do not establish resilience to
+      failure of ML-KEM itself.
+
+   *  *CKAKE:* [CKAKE] provides KEM authentication, forward secrecy, and
+      a composable proof in Constructive Cryptography.  Its server-
+      initiated exchange takes one and a half round trips; pre-
+      distributing the server public key permits explicitly
+      authenticated data after one round trip.  Its modeled goal
+      authenticates the server to clients rather than establishing
+      PQuAKE's intended mutual credential authentication.  The paper's
+      bandwidth comparison counts cryptographic objects and the server
+      public key, excluding certificate metadata and signatures.  It
+      reports slightly smaller totals than KEMTLS with ML-KEM, so
+      composability must not be presumed to impose a bandwidth penalty.
+      Its setup resources and guarantees require comparison with an
+      integration's needs.  This draft does not claim a composable
+      proof.
+
+   PQuAKE targets mutual authentication with exchanged certified KEM
+   keys and optional protection of credentials against active outsiders.
+   Its costs include both credential payloads, static-key encapsulations
+   and decapsulations, confirmation traffic, and, for active hiding,
+   provisioning and protection of a symmetric secret.  Removing online
+   handshake signatures does not remove certificate signatures or their
+   validation cost.  The CAKE-HI analysis [CAKE-HI] is relevant
+   evidence, subject to the model and specification limits in Section 6;
+   it is not an independent alternative demonstrating that PQuAKE
+   outperforms the constructions above.
+
+   A quantitative comparison must hold the algorithm security level,
+   authentication direction, certificate-chain and caching assumptions,
+   and required authentication and forward-secrecy stage constant.  It
+   must count complete encoded messages, fragmentation and transport
+   overhead, and distinguish earliest application data from completed
+   key confirmation.  Without such a comparison, this document claims a
+   candidate compact construction for review, not a measured bandwidth,
+   latency, or energy advantage over every alternative.
+
+1.5.  Security Goals and Component Requirements
+
+   The intended goals are session-key secrecy, mutual authentication
+   after key confirmation, fresh keys, replay resistance, and forward
+   secrecy for completed sessions after subsequent compromise of long-
+   term keys.  Credential confidentiality against passive observers is a
+   separate goal.  Protection against active observers additionally
+   depends on an uncompromised pre-shared secret and the privacy
+   conditions in Section 6.8.  These are goals with explicit
+   preconditions, not unconditional guarantees.
+
+   The components SHALL satisfy the following requirements:
+
+   *  KEM shared-secret confidentiality under adaptive chosen-ciphertext
+      attack (IND-CCA2), with the selected KEM's input checks and
+      rejection behavior implemented correctly.
+
+   *  Authenticated encryption for certificates, with confidentiality
+      and ciphertext integrity under the specified nonce discipline.
+
+   *  A KDF with extraction and expansion properties sufficient for the
+      claimed multi-secret key derivation, with separate domains for
+      credential, confirmation, and application keys.
+
+   *  A collision-resistant transcript hash and a MAC with the PRF and
+      unforgeability properties required by the analysis.
+      Unforgeability alone is insufficient for the reported identity-
+      hiding argument.
+
+   *  A certificate signature scheme and validation policy that securely
+      bind the accepted peer identity to the correct static KEM public
+      key.
+
+   Implicit rejection means that an invalid, correctly sized KEM
+   ciphertext produces a fallback secret rather than a distinguishable
+   decapsulation failure.  It does not permit bypassing public-key or
+   input-length checks.  IND-CCA2 alone does not establish recipient
+   anonymity or identity hiding.  Where a privacy proof uses IK-CCA2
+   (key indistinguishability under chosen-ciphertext attack), that
+   additional property must be stated and justified for the chosen
+   instantiation; it must not be inferred from ML-KEM standardization.
+   See [NIST-SP-800-227] and
+   [I-D.sfluhrer-cfrg-ml-kem-security-considerations] for KEM use and
+   implementation considerations.
+
+1.6.  Proposed Version 1 Algorithm Suite
+
+   The proposed mandatory-to-implement suite for Version 1 is:
+
+   *  Certificate encryption: AES-256-GCM with a 96-bit nonce and
+      128-bit tag.
+
+   *  Ephemeral and static KEMs: ML-KEM-1024 [FIPS203].
+
+   *  Transcript hash: SHA-384.
+
+   *  Confirmation MAC: HMAC-SHA-384, without truncation.
+
+   *  KDF: HKDF-SHA-384 [HKDF].
+
+   *  Certificate signature: ML-DSA-87 [FIPS204].
+
+   Naming these algorithms is not a proof that they instantiate every
+   idealized assumption of a formal model.  In particular, the exact
+   HKDF Extract/Expand mapping, labels, output lengths, authenticated
+   encryption inputs, and certificate profile still need to be completed
+   and checked against the models (Section 7.4).  This revision is not
+   yet a complete interoperable implementation specification.
+
+2.  Conventions and Definitions
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+3.  Protocol Description
+
+   The PQuAKE protocol consists of four steps.  Messages within the
+   certificate, static encapsulation, and confirmation steps may cross
+   in transit.  Both messages of a step MUST be available before
+   deriving values that depend on that complete step.  A party MUST NOT
+   accept the exchange or release application keys until its peer's
+   confirmation is verified and all credential and authorization checks
+   have succeeded.
+
+   1.  Establish an ephemeral KEM secret and exchange encrypted
+       certificates.
+
+   2.  Encapsulate to each peer's certified static KEM key and exchange
+       ciphertexts.
+
+   3.  Decapsulate and derive separate confirmation and application keys
+       from the ephemeral secret, both static KEM secrets, and the
+       ordered transcript.
+
+   4.  Exchange and verify key-confirmation MACs.
+
+   Malformed messages, authentication-tag failures, invalid
+   certificates, failed confirmation, and timeouts MUST prevent
+   acceptance.  Avoiding identity-dependent failure signals is an
+   additional privacy requirement; it does not justify accepting invalid
+   credentials or continuing with unvalidated KEM inputs.  Error
+   handling and the remaining privacy behavior are discussed in
+   Section 3.6 and Section 6.8.
+
+   The diagram uses abstract cryptographic operations.  KEM.decap(sk,
+   ct) takes the private key first. ct_i, ss_i denote the ciphertext and
+   secret created by the initiator for the responder's static public key
+   pk_r; ct_r, ss_r denote those created by the responder for pk_i.
+   sk_e, pk_e are an independently generated ephemeral key pair for this
+   execution. ss_pre is an optional, high-entropy pre-shared symmetric
+   secret. ss_pre is the empty octet string when no pre-shared secret is
+   used.  The logical KDF inputs below follow Figure 1 of [CAKE-HI];
+   their exact HKDF parameter mapping remains to be specified.
+
+   H_i and H_r hash the messages sent by the initiator and responder,
+   respectively, in protocol-step order.  The transcript T = H_i || H_r
+   always places the initiator's hash first, regardless of which party
+   computes it or the order in which messages arrive.  Both parties use
+   the same ordering in the final KDF.  Initiator confirmation covers
+   H_i || H_r; responder confirmation covers H_r || H_i, matching
+   Figure 1 of [CAKE-HI].  The hashes are chained: H_i = H(H(H(pk_e) ||
+   e_cert_i) || ct_i) and H_r = H(H(H(ct_e) || e_cert_r) || ct_r).  The
+   exact message encoding and context binding remain specification work
+   (Section 7.4).
+
+   The credential-encryption key provides protection before peer
+   authentication.  It MUST NOT be used as an authenticated application
+   key.  The final key derivation includes ss_e, ss_i, ss_r, and
+   optional ss_pre directly, together with T, as in Figure 1 of
+   [CAKE-HI].  The reported analyses permit adversarial knowledge or
+   choice of ss_pre for properties other than identity hiding.
+   Including it is not a claim of a separately proved PSK-only fallback
+   if all KEM contributions fail.
+
+3.1.  Protocol Diagram
+
+   Initiator                                                 Responder
+   -------------------------------------------------------------------
+
+   Establish initial secret and exchange encrypted certificates
+   ------------------------------------------------------------
+   (sk_e, pk_e) <- KEM.keygen()
+   { pk_e } -->
+                                       (ct_e, ss_e) <- KEM.encap(pk_e)
+                                                          <-- { ct_e }
+   ss_e <- KEM.decap(sk_e, ct_e)
+
+   k_hid <- kdf_1(ss_e || ss_pre || "HID")
+                                 k_hid <- kdf_1(ss_e || ss_pre || "HID")
+   e_cert_i <- Enc(k_hid, cert_i)       e_cert_r <- Enc(k_hid, cert_r)
+   { e_cert_i } -->                                   <-- { e_cert_r }
+
+   Validate credentials and encapsulate to static KEM keys
+   -------------------------------------------------------
+   cert_r <- Dec(k_hid, e_cert_r)       cert_i <- Dec(k_hid, e_cert_i)
+   Validate cert_r and pk_r            Validate cert_i and pk_i
+   (ct_i, ss_i) <- KEM.encap(pk_r)     (ct_r, ss_r) <- KEM.encap(pk_i)
+   { ct_i } -->                                           <-- { ct_r }
+
+   Decapsulate and derive keys
+   ---------------------------
+   ss_r <- KEM.decap(sk_i, ct_r)         ss_i <- KEM.decap(sk_r, ct_i)
+   H_i <- H(H(H(pk_e) || e_cert_i) || ct_i)
+                          H_i <- H(H(H(pk_e) || e_cert_i) || ct_i)
+   H_r <- H(H(H(ct_e) || e_cert_r) || ct_r)
+                          H_r <- H(H(H(ct_e) || e_cert_r) || ct_r)
+   T <- H_i || H_r                     T <- H_i || H_r
+   S <- ss_e || ss_i || ss_r || ss_pre || T
+                         S <- ss_e || ss_i || ss_r || ss_pre || T
+   k_C_i, k_C_r, k_session             k_C_i, k_C_r, k_session
+       <- kdf_2(S)                        <- kdf_2(S)
+
+   Key confirmation (only accept after verifying peer MAC)
+   -------------------------------------------------------
+   C_i <- HMAC(k_C_i, H_i || H_r)
+                                   C_r <- HMAC(k_C_r, H_r || H_i)
+   { C_i } -->                                             <-- { C_r }
+   Verify C_r and peer policy          Verify C_i and peer policy
+
+3.2.  Exchange certificates
+
+   During this step, both nodes establish a shared ephemeral key via a
+   KEM, then use it to encrypt certificates before transmitting them.
+
+   The initiator generates a fresh ephemeral key pair and transmits the
+   public key.  The responder validates that key, encapsulates to it,
+   and returns the ciphertext.  The initiator validates the ciphertext's
+   type and length and decapsulates with its ephemeral private key.
+   Both parties derive the credential-encryption key from ss_e and, if
+   present, ss_pre, then encrypt and transmit their certificates.
+
+   Before using a received static KEM key, each party MUST authenticate
+   its binding to the peer identity using certificate path validation
+   and the deployment's trust and key-usage policy.  Validation includes
+   certificate signatures, validity periods, and applicable revocation
+   requirements.  An invalid credential MUST NOT lead to successful
+   completion.  Identity acceptance and authorization remain separate
+   from signature verification; a valid certificate for an unexpected
+   identity does not authenticate the intended peer.  When active
+   identity hiding is required, the decision based on an out-of-band
+   expected identity MUST be deferred until after key confirmation, as
+   in Section 6.3 of [CAKE-HI].  This does not defer checks needed to
+   authenticate and validate the static KEM key before using it.
+
+   Both directions currently use k_hid.  AES-GCM nonce uniqueness MUST
+   hold across both senders using that key.  Independently assigning the
+   same nonce in each direction is unsafe.  A deterministic allocation
+   of distinct 96-bit nonces by role, or separate encryption keys by
+   role, must be specified and reflected in the formal model.  This
+   draft does not yet select that mapping (Section 7.4).
+
+3.2.1.  Key Derivation of k_hid with preshared secret
+
+   k_hid <- kdf_1(ss_e || ss_pre || "HID");
+
+3.2.2.  Key Derivation of k_hid without preshared secret
+
+   k_hid <- kdf_1(ss_e || "HID");
+
+3.2.3.  Initiator
+
+   e_cert_i <- E(k_hid, cert_i);
+
+3.2.4.  Responder
+
+   e_cert_r <- E(k_hid, cert_r);
+
+3.3.  Encapsulate shared secrets
+
+   During this step, both nodes generate an encapsulated secret via a
+   KEM.  The ciphertexts are exchanged.
+
+3.3.1.  Initiator
+
+   (ct_i, ss_i) <- KEM.encap(pk_r);
+
+3.3.2.  Responder
+
+   (ct_r, ss_r) <- KEM.encap(pk_i);
+
+3.4.  Decapsulate ciphertexts and key derivation
+
+   The ciphertexts are decapsulated by both parties.  At this point,
+   both sides have all the shared secrets required to derive a set of
+   session keys.
+
+3.4.1.  Initiator
+
+   ss_r <- KEM.decap(sk_i, ct_r);
+
+   H_i <- H(H(H(pk_e) || e_cert_i) || ct_i);
+
+   H_r <- H(H(H(ct_e) || e_cert_r) || ct_r);
+
+   T <- H_i || H_r;
+
+   k_C_i, k_C_r, k_session <- kdf_2(ss_e || ss_i || ss_r || ss_pre ||
+   T);
+
+3.4.2.  Responder
+
+   ss_i <- KEM.decap(sk_r, ct_i);
+
+   H_i <- H(H(H(pk_e) || e_cert_i) || ct_i);
+
+   H_r <- H(H(H(ct_e) || e_cert_r) || ct_r);
+
+   T <- H_i || H_r;
+
+   k_C_i, k_C_r, k_session <- kdf_2(ss_e || ss_i || ss_r || ss_pre ||
+   T);
+
+   These are logical inputs, not a complete definition of HKDF
+   parameters.  The secrets and transcript MUST be encoded
+   unambiguously.  Confirmation keys and application keys MUST be
+   derived in distinct domains.
+
+3.5.  Key Confirmation
+
+   Key confirmation uses HMAC-SHA-384 under a separate key for each
+   sender role.  The initiator sends C_i <- HMAC(k_C_i, H_i || H_r); the
+   responder sends C_r <- HMAC(k_C_r, H_r || H_i).  The responder
+   verifies C_i under k_C_i, and the initiator verifies C_r under k_C_r,
+   using a constant-time comparison and the complete 48-octet MAC value.
+
+   A party MUST NOT accept a reflected local confirmation as the peer's
+   confirmation.  Direction-specific keys and message types distinguish
+   the two messages.  Successful local verification shows that the peer
+   can compute the expected confirmation for this transcript, subject to
+   the assumptions in Section 6.  It does not show that the peer has
+   received or verified the local confirmation, or authorize application
+   access by itself.
+
+3.6.  Error Handling
+
+   An active attacker can alter, replay, drop, or reorder messages and
+   can cause denial of service.  Transcript binding and confirmation are
+   intended to prevent acceptance of an altered exchange, not to
+   guarantee delivery or availability.  Implementations MUST validate
+   message framing, type, length, algorithm-specific inputs, and
+   expected protocol step before processing them.  Unsupported versions,
+   unexpected message types, truncated fields, and inconsistent lengths
+   MUST NOT lead to acceptance.
+
+   Timeouts and resource limits SHOULD be configurable and bounded.  A
+   failed or abandoned exchange MUST discard its pending key material.
+   A retry MUST start a new exchange with fresh ephemeral keys and
+   encapsulation randomness.  Transport retransmission, if supplied by
+   an integration, must be distinguished from advancing protocol state
+   and must not repeat a message in the logical transcript.
+
+   This draft defines no peer-visible error notification.  Such
+   behavior, including any delayed identity-dependent failure, must be
+   specified and analyzed before active identity hiding can be claimed.
+   Logs, response timing, error codes, and differences in subsequent
+   traffic can disclose identities even when certificates are encrypted.
+   Failure handling MUST preserve validation requirements and MUST NOT
+   provide a decapsulation validity oracle.
+
+4.  Protocol Messages
+
+   The message formats below describe the proposed exchange.  A checksum
+   is not a cryptographic integrity mechanism; integrity at acceptance
+   depends on authenticated credential encryption and final transcript
+   confirmation.  The framing and context still require the refinements
+   identified in Section 7.4.
+
+4.1.  Message Format
+
+   A message of the protocol is formatted as follows:
+
+    0               1               2               3 0 1 2 3 4 5 6 7 0
+    1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    Version    |     Type      |            Length             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                             Data                            ...
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   Version: 8 bits
+
+   The version field indicates the format of the initiator hello
+   message.  This document describes version 1.
+
+   Type: 8 bits
+
+   This field indicates the current step of the protocol.
+
+   Length: 16 bits
+
+   Length is the length of the data, measured in octets.  This field
+   allows the length of the data to be up to 65535 octets.
+
+   Data: variable
+
+   This field changes based on the current step of the protocol.
+
+4.2.  Hello Messages
+
+   The Initiator generates an ephemeral KEM key-pair (sk_e, pk_e) =
+   KEM.keygen() and sends the public key pk_e to its intended recipient
+   (the Responder).  The Responder performs encapsulation (ct_e, ss_e) =
+   KEM.encap(pk_e) and sends the ciphertext ct_e to the Initiator.
+
+4.2.1.  Initiator Hello
+
+   An Initiator Hello message is formatted as follows:
+
+    0               1               2               3 0 1 2 3 4 5 6 7 0
+    1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    Version    |     Type      |            Length             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                    Ephemeral Public Key                     ...
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   Version: 8 bits
+
+   The version field indicates the format of the initiator hello
+   message.  This document describes version 1.
+
+   Type: 1
+
+   This field indicates the state of the protocol.
+
+   Length: 16 bits
+
+   Length is the length of the ephemeral public key, measured in octets.
+   This field allows the length of a ephemeral public key to be up to
+   65535 octets.
+
+   Ephemeral Public Key: variable
+
+   The initiator MUST generate a fresh, independent ephemeral key pair
+   for each new protocol execution and MUST NOT reuse the private key
+   across executions.  Public keys need not be numerically unique with
+   probability one; freshness requires independent generation with
+   secure randomness.
+
+4.2.2.  Responder Hello
+
+   A Responder Hello message is formatted as follows:
+
+    0               1               2               3 0 1 2 3 4 5 6 7 0
+    1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    Version    |     Type      |            Length             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                    Encapsulated Secret                      ...
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   Type: 2
+
+   Encapsulated Secret: variable
+
+   The size of this field depends on the key encapsulation mechanism
+   used.
+
+4.3.  Certificate Exchange
+
+   A Certificate Exchange message is formatted as follows:
+
+    0               1               2               3 0 1 2 3 4 5 6 7 0
+    1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    Version    |     Type      |            Length             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |      Initial Vector      | Encrypted Certificate           ...
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |      Authentication Tag       |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   Type: 3 for initiator, 4 for responder
+
+   Initial Vector: 96 bits
+
+   Encrypted Certificate: variable
+
+   Authentication Tag: 128 bits
+
+   The certificate is encrypted with the derived key k_hid.  The nonce
+   and tag are part of the encrypted-certificate message and must be
+   bound into the transcript.  Nonce allocation across both directions
+   remains to be specified (Section 7.4).
+
+4.4.  Certificate Format
+
+   For now, we use standard X.509 certificate [X.509] with OIDs
+   specifying ML-KEM [FIPS203] and ML-DSA [FIPS204] correspondingly.
+   Future extensions may use different certificate formats.
+
+4.5.  Encapsulation
+
+   An Encapsulation message is formatted as follows:
+
+    0               1               2               3 0 1 2 3 4 5 6 7 0
+    1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    Version    |     Type      |            Length             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                    Encapsulated Secret                      ...
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   Type: 5 for initiator, 6 for responder
+
+   Encapsulated Secret: variable
+
+   The size of this field depends on the key encapsulation mechanism
+   used.
+
+4.6.  Key Confirmation
+
+   A Key Confirmation message is formatted as follows:
+
+    0               1               2               3 0 1 2 3 4 5 6 7 0
+    1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    Version    |     Type      |            Length             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                  Key Confirmation Value                     ...
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   Type: 7 for initiator, 8 for responder
+
+   Key Confirmation Value: 384 bits (output size of SHA384)
+
+   This field is the computed HMAC value of the exchange transcript.
+
+5.  Initial Considerations for Protocol Integration
+
+   This section identifies questions for future integration
+   specifications.  It does not define a mapping of PQuAKE messages into
+   an existing protocol or supply guidance to the corresponding working
+   groups.  Each integration must choose its own key schedule and
+   establish that its negotiated algorithms, identities, context,
+   transcript, and acceptance rules preserve the intended security
+   properties.  A proof for the standalone construction is not a proof
+   for the resulting protocol.
+
+5.1.  IKEv2
+
+   An IKEv2 [IKEV2] integration would need to define how the exchange
+   relates to IKE SA establishment, identity and AUTH payloads, traffic
+   selectors, and the derivation of IKE and Child SA keys.  Negotiation,
+   downgrade protection, fragmentation, retransmission, and failure
+   handling require a dedicated specification.  RFC 9370 [RFC9370]
+   concerns multiple key exchanges in IKEv2; it does not by itself
+   define PQuAKE authentication.  The individual proposal
+   [I-D.wang-ipsecme-kem-auth-ikev2] provides a concrete example of
+   applying PQuAKE's approach to IKEv2.  Its change log states that
+   version 02 incorporated PQuAKE's ideas and version 04 aligned the
+   exchange sequence with PQuAKE; Section 5 refers to PQuAKE for further
+   details of KEM-based authentication.  This demonstrates interest in
+   using the construction in a protocol-specific design.  Its IKEv2
+   message formats, key schedule, and security analysis remain the
+   responsibility of that integration specification.
+
+5.2.  EDHOC
+
+   EDHOC [EDHOC] has its own authentication methods, transcript hashes,
+   credential processing, and exporter.  Replacing parts of its exchange
+   with PQuAKE cannot be assumed to preserve those properties or its
+   communication costs.  Any proposed composition needs a complete
+   message and key-schedule definition and an EDHOC-specific security
+   analysis.  PQuAKE's optional pre-shared secret for credential hiding
+   is a choice of this construction, not a requirement or proposal for
+   LAKE.
+
+5.3.  EAP
+
+   A new EAP method would need to meet the EAP key-management framework
+   [EAP], including method identification, peer/server role mapping,
+   exported key definitions, session identifiers, channel binding where
+   applicable, and authentication-server interactions.  Fragmentation,
+   retransmission, and deployment authorization also need specification.
+   This draft defines neither an EAP method nor its security properties.
+
+6.  Security Analysis and Formal Evidence
+
+   This section separates the intended security argument from the
+   evidence currently associated with the draft.  The authors report
+   computational CryptoVerif and symbolic Verifpal analyses of the
+   closely related CAKE-HI construction [CAKE-HI].  A statement about
+   that modeled construction must not be presented as a proof of every
+   PQuAKE message format, algorithm instantiation, or protocol
+   integration.
+
+6.1.  Evidence and Model Scope
+
+   Sections 5 and 6 of [CAKE-HI] report CryptoVerif and Verifpal results
+   for the construction in its Figure 1.  The reported properties and
+   their model-specific meanings are summarized here.  The full
+   versioned models, proof scripts, and tool versions remain pending
+   incorporation; the results have not been independently reproduced for
+   this draft.
+
+   +================+======================+===========================+
+   | Property       | CryptoVerif          | Verifpal                  |
+   +================+======================+===========================+
+   | Session-key    | Real-or-random       | Symbolic key              |
+   | secrecy        | secrecy              | confidentiality           |
+   +----------------+----------------------+---------------------------+
+   | Authentication | Event                | Dishonest-value exclusion |
+   |                | correspondence       | at confirmation           |
+   +----------------+----------------------+---------------------------+
+   | Freshness      | Negligible           | No forced successful      |
+   |                | repeated-key         | reuse                     |
+   |                | probability          |                           |
+   +----------------+----------------------+---------------------------+
+   | Forward        | Restricted           | Phase-limited static-key  |
+   | secrecy        | static-key           | leakage                   |
+   |                | exposure             |                           |
+   +----------------+----------------------+---------------------------+
+   | Identity       | Equal-length         | Credential                |
+   | hiding         | public-key           | confidentiality           |
+   |                | choice game          |                           |
+   +----------------+----------------------+---------------------------+
+
+                                  Table 2
+
+   The CryptoVerif secrecy experiment additionally permits adversarial
+   selection of the initiator's ephemeral key pair.  Its freshness
+   experiment compares new keys with stored keys from earlier
+   executions.  Identity hiding requires secret ss_pre in both tools.
+   CryptoVerif compares public-key choices by indistinguishability;
+   Verifpal checks confidentiality of credential terms, not an
+   unlinkability query.  These distinct definitions must be retained
+   when describing the reported results.
+
+   For the CryptoVerif forward-secrecy experiments (Section 5.7), an
+   attacker may obtain both static private keys while being unable to
+   modify pk_e and ct_e, or obtain the initiator's static private key
+   while being unable to modify pk_e.  Those experiments do not
+   establish unrestricted active forward secrecy under arbitrary
+   ephemeral-message modification and static-key exposure.  The Verifpal
+   phase restriction similarly matters.
+
+   The execution environment in Section 5.2 assumes prior authentic
+   exchange of the parties' long-term public keys.  Certificates are
+   modeled as public keys, without metadata or certificate signatures.
+   The CryptoVerif models permit concurrent executions and use a setup
+   table of valid keys.  The Verifpal models assume knowledge of valid
+   keys, with a membership check rather than an early expected-identity
+   equality check.  These abstractions leave X.509 parsing, path
+   validation, revocation, and application identity policy to the
+   specification and implementation analysis.
+
+   The two authentication definitions must also be distinguished.
+   CryptoVerif uses event correspondence with the static KEM secrets as
+   parameters.  Section 5.12 describes a Verifpal authentication
+   definition that can admit a confirming value generated by the party
+   performing the check.  The reported symbolic result therefore must
+   not be restated as independently establishing distinct-peer identity
+   agreement or mutual acceptance.
+
+   CryptoVerif provides computational evidence under the modeled
+   assumptions.  Verifpal provides a complementary symbolic check;
+   Section 5.10 describes its search and soundness limits.  Neither tool
+   automatically verifies a wire implementation or an unmodeled error
+   path.
+
+6.2.  Primitive Assumptions in the Reported Computational Analysis
+
+   Section 5.8 of [CAKE-HI] models the final KDF as a random oracle.
+   The credential KDF is modeled as a PRF, except in the forward-secrecy
+   models where it is also a random oracle.  Domain separation is
+   assumed.  The analysis also requires IND-CCA2 certificate encryption,
+   an IND-CCA2, implicitly rejecting KEM with IK-CCA2 for identity
+   hiding, a PRF for the confirmation MAC, and collision resistance of
+   the transcript hash for freshness.  The paper requires the applicable
+   assumptions to hold against the stated quantum adversary with
+   classical oracle access.
+
+   Section 5.13 describes different symbolic abstractions: HKDF, ENC/
+   DEC, PKE encryption/decryption, MAC/ASSERT, and HASH/CONCAT.  These
+   do not validate all details of a concrete ML-KEM, AES-GCM, or X.509
+   implementation.
+
+   The exact HKDF-SHA-384 mapping and AES-GCM nonce discipline still
+   need to be checked against the computational assumptions.  HMAC's PRF
+   or quantum security does not alone make every concrete HKDF
+   invocation an ideal random oracle.  Similarly, a sponge-construction
+   result for SHA-3, cited in Section 5.8 of the paper, does not justify
+   SHA-384, which uses a different construction.  Collision resistance
+   of SHA-384 is an explicit assumption here and needs its own
+   supporting rationale.
+
+6.3.  Relationship to the PQuAKE Specification
+
+   This revision aligns the logical diagram with CAKE-HI Figure 1: the
+   optional pre-shared secret contributes to both KDFs, the transcript
+   uses chained hashes of encrypted credentials, and the two
+   confirmation MACs use the corresponding directional transcript order
+   and separate keys.  The original draft's inconsistencies in these
+   values cannot be treated as already covered by the reported proofs.
+
+   A complete mapping still needs the versioned proof artifacts, exact
+   query and acceptance-event definitions, and a comparison of message
+   encoding, HKDF instantiation, nonces, credentials, and error
+   behavior.  Published results for CAKE-HI support review of the
+   logical construction; they are not a completed proof of the PQuAKE
+   wire profile or its integrations.
+
+6.4.  Threat Model and Assumptions
+
+   The intended network attacker may observe, initiate, interleave,
+   modify, replay, delay, or suppress exchanges.  Credential
+   authenticity depends on trusted certification authorities, correct
+   path validation, and binding the validated identity and key to the
+   intended peer.  Corrupted endpoints, compromised trust anchors,
+   implementation side channels, and denial of service are not excluded
+   by network-message cryptographic arguments.
+
+   A security claim must state which static private keys, ephemeral
+   private keys, encapsulation randomness, pre-shared secrets, and
+   established session keys can be exposed and when.  For the forward-
+   secrecy intuition here, the exchange completes between honest parties
+   before static-key exposure, and ephemeral secrets and randomness have
+   been securely erased.  No unrestricted claim under concurrent
+   endpoint compromise is made.
+
+   The confidentiality argument relies on KEM shared-secret security,
+   authenticated encryption, the stated KDF assumptions, and secure
+   randomness.  Authentication additionally relies on credential
+   integrity, static-key secrecy in the relevant execution, transcript
+   binding, and unforgeable confirmation MACs.  Identity privacy has
+   additional conditions in Section 6.8.  An ideal random oracle used in
+   an analysis is not identical to concrete HKDF-SHA-384; that
+   instantiation requires justification.
+
+6.5.  Session-Key Secrecy and Forward Secrecy: Intuition
+
+   The final key depends on ss_e, ss_i, ss_r, and optional ss_pre.  In
+   an honest completed execution, an outsider should not recover those
+   KEM contributions from the public keys and ciphertexts.  A proof
+   would use the relevant KEM security games to replace protected
+   contributions with random secrets, then justify the secrecy of the
+   derived application key under the KDF assumptions.  Merely
+   concatenating secrets is not a complete reduction, and claims for
+   maliciously chosen inputs or exposed contributions need the
+   corresponding multi-session analysis.
+
+   After later compromise of both static KEM private keys, recorded ct_i
+   and ct_r can reveal the static contributions.  The intended
+   protection of the old session key therefore rests on the ephemeral
+   contribution ss_e.  Independent ephemeral generation and erasure of
+   sk_e, ss_e, and the encapsulation randomness that could reconstruct
+   it are essential.  This explains the forward-secrecy goal for
+   completed sessions; it does not establish security if ephemeral state
+   was retained or exposed, nor forward secrecy of certificates against
+   exposure of their encryption key.
+
+6.6.  Mutual Authentication and Key Confirmation: Intuition
+
+   Consider an attacker impersonating the responder to an honest
+   initiator.  The initiator encapsulates ss_i to the static key in the
+   responder's validated certificate.  To produce the expected C_r, the
+   attacker needs a confirmation key depending on that secret and the
+   transcript.  Without the responder's private key or a forgery, it
+   should not obtain the missing contribution.  The corresponding
+   argument for an attacker impersonating the initiator uses ss_r,
+   encapsulated by the honest responder to pk_i.
+
+   This argument concerns an honest party's challenge to its peer.  The
+   encapsulator already knows the secret it creates: success does not
+   imply that both parties necessarily ran a particular decapsulation
+   operation.  Relaying an honest exchange also need not reveal its keys
+   to the relay.  A full authentication result must establish agreement
+   on peer identities, roles, the transcript, and the session, including
+   concurrent sessions.  Certificate validation alone, or equality of
+   derived keys alone, does not establish that agreement.
+
+   Separate k_C_i and k_C_r prevent simply reflecting the local MAC as
+   peer confirmation.  A valid peer MAC confirms possession of a derived
+   key for the local transcript.  Each party must also validate the
+   expected peer identity and apply authorization policy before
+   accepting.  If confirmation messages cross, one party's local
+   acceptance does not imply the other party has accepted.
+
+6.7.  Transcript Binding, Freshness, and Replay: Intuition
+
+   Both peers derive keys from the same ordered transcript T.  Altering
+   a bound message should change the transcript or an underlying secret,
+   so an old confirmation should no longer verify.  Fresh ephemeral keys
+   and encapsulation randomness are intended to separate executions.
+   Key freshness is a probabilistic security property, not a guarantee
+   that random outputs never collide.
+
+   The transcript must have an unambiguous encoding and bind message
+   types, roles, the selected suite, version, and any external
+   application context that changes the meaning of the exchange.
+   Otherwise identical byte strings could be interpreted differently, or
+   a valid exchange could be misbound to a different use.  This draft's
+   abstract hashes require the completion identified in Section 7.4
+   before replay and identity-agreement claims can be tied to an
+   interoperable encoding.
+
+6.8.  Identity Privacy: Intuition and Limits
+
+   Without ss_pre, a passive observer is intended to be unable to derive
+   k_hid from the ephemeral KEM traffic.  An active attacker, however,
+   can supply its own ephemeral key or encapsulation and know the
+   resulting ss_e.  It can then decrypt a peer's certificate before
+   static-key authentication finishes.  Later failure of key
+   confirmation does not undo that disclosure.
+
+   With an uncompromised, high-entropy ss_pre, the credential-encryption
+   KDF is intended to deny that key to an active outsider even when it
+   controls the ephemeral exchange.  A member of the same Community of
+   Interest holding that secret has no such protection.  This mechanism
+   is not password authentication: a low-entropy secret can admit
+   offline guessing using the certificate encryption tag and
+   recognizable plaintext.  The modeled KDF and encryption assumptions
+   must support the claimed protection for the chosen secret
+   distribution.
+
+   Credential encryption alone does not establish anonymity or
+   unlinkability of the entire exchange.  Static-key ciphertexts,
+   certificate lengths, network addresses, timing, and identity-
+   dependent aborts can distinguish peers.  The CryptoVerif privacy
+   model compares equal-length public keys; it does not model arbitrary
+   certificate metadata or traffic analysis.  Verifpal's credential-
+   confidentiality query is not the same property.
+
+   Section 5.8 of [CAKE-HI] invokes the Kyber anonymity result
+   [KYBER-ANONYMITY] to support IK-CCA2.  That is relevant evidence,
+   rather than a property inferred from IND-CCA2 alone.  Applying the
+   result to standardized ML-KEM-1024 requires checking the definitions,
+   algorithm version, and model instantiation.  This draft leaves that
+   mapping open; it makes no unconditional claim of complete identity
+   hiding.
+
+   Section 6 of [CAKE-HI] reports two instructive privacy failures in
+   weaker variants.  Early failure based on an out-of-band expected
+   identity can distinguish peers; the paper delays that decision until
+   the end of the exchange.  Hashing plaintext credentials, combined
+   with a MAC assumed only unforgeable rather than pseudorandom, can
+   also disclose identity information.  This revision hashes encrypted
+   credentials and retains the PRF assumption for HMAC.  Required
+   credential and input validation still must hold; implementation
+   timing and failure paths need separate review.
+
+6.9.  Limits of the Analysis
+
+   Section 5.3 of [CAKE-HI] describes polynomially bounded quantum
+   adversaries with classical oracle access.  Section 6.6.2 explicitly
+   leaves superposition access to random oracles outside its completed
+   analysis.  A result in that model is not a quantum-random-oracle
+   proof.  The relevant post-quantum CryptoVerif methodology is
+   described in [CRYPTOVERIF-PQ]; its applicability depends on the tool
+   version, transformations, and quantum assumptions used in the actual
+   artifacts.
+
+   A post-quantum KEM alone does not establish those properties for a
+   classical proof or a concrete key schedule.  This revision makes
+   neither a QROM claim nor a universal-composability claim.  The
+   paper's suggestion that its arguments may extend to QROM is future
+   work, not a proven result.
+
+   A protocol integration must supply its own composition argument,
+   including application key derivation, negotiation, and acceptance
+   events.  Concrete security bounds, multi-user effects, key-compromise
+   impersonation, ephemeral-secret exposure, and stronger identity-
+   agreement properties must be assessed before claiming them for
+   PQuAKE.
+
+7.  Security Considerations
+
+   Safe use requires both the construction-level conditions above and
+   correct handling of credentials, keys, messages, and failures.  The
+   following requirements apply to implementations of any completed
+   PQuAKE profile; they do not resolve the specification gaps listed
+   below.
+
+7.1.  Credential Validation and Authorization
+
+   Implementations MUST validate the certificate chain and its binding
+   to the static KEM key, check key usage and algorithm parameters, and
+   enforce the expected peer identity and authorization policy before
+   acceptance.  For active identity hiding, the identity-dependent
+   decision is deferred until after confirmation (Section 6.8).  Using a
+   valid certificate belonging to an unintended peer is not successful
+   authentication of the intended peer.  Certificates containing
+   unsupported or malformed keys MUST NOT be used for encapsulation.  A
+   post-quantum certificate signature alone does not make a chain with
+   vulnerable certification keys post-quantum secure.
+
+7.2.  Key Lifecycle and Randomness
+
+   Implementations MUST use cryptographically secure randomness for key
+   generation, encapsulation, and any randomized nonce allocation.  They
+   MUST protect static private keys and pre-shared secrets and erase
+   ephemeral private keys, ephemeral secrets, encapsulation randomness,
+   and intermediate KDF material when no longer needed.  Failed
+   exchanges MUST discard pending application and confirmation keys.
+   Certificate-encryption and confirmation keys MUST NOT be reused for
+   application traffic.  Static KEM keys SHOULD be dedicated to the
+   defined protocol use to avoid unreviewed cross-protocol interactions.
+
+   A shared Community-of-Interest secret needs provisioning, rotation,
+   revocation, and compromise recovery.  Possessing it is not individual
+   peer authentication, and its compromise permits active credential
+   disclosure within the scope described in Section 6.8.
+
+7.3.  Input Handling and Resource Limits
+
+   Implementations MUST validate supported versions and types, exact
+   lengths, field boundaries, cryptographic input formats, and expected
+   protocol state before using an input.  A 16-bit length field is not
+   sufficient protection against resource exhaustion.  Deployments
+   SHOULD bound concurrent pending exchanges, credential-chain size and
+   depth, fragmentation buffers, and processing time.  They MUST NOT
+   release decrypted plaintext on AEAD tag failure or application keys
+   on confirmation failure.
+
+   KEM checks and implicit rejection MUST follow the selected
+   algorithm's specification.  Implementations MUST avoid exposing
+   validity through secret-dependent branches, timing, or distinct
+   decapsulation errors.  Generic parser failures still need bounded and
+   safe handling.  Side-channel and fault resistance require
+   implementation review beyond the abstract protocol analysis.
+
+7.4.  Specification Work Required Before Interoperable Use
+
+   The following issues require resolution and review before this draft
+   can serve as a complete interoperable specification:
+
+   *  Define each HKDF Extract and Expand invocation, including salt,
+      input key material, domain labels, context, output lengths, and
+      the no-pre-shared-secret case.  Justify the concrete KDF against
+      the formal assumptions.
+
+   *  Define the exact transcript encoding, including headers,
+      encryption nonces and tags, suite and version, role ordering, and
+      external context.  Specify how validated identities and KEM keys
+      are bound to session acceptance and assess unknown-key-share and
+      concurrent-session attacks.
+
+   *  Allocate AES-GCM nonces safely across both senders under k_hid, or
+      specify separate directional keys, and define authenticated
+      associated data.  Include this choice in the formal analysis and
+      test vectors.
+
+   *  Complete the X.509 KEM-key and signature profile, algorithm
+      identifiers, key-usage rules, chain encoding, and trust and
+      revocation requirements.
+
+   *  Define privacy-preserving failure behavior without bypassing
+      required checks, and justify any recipient-anonymity assumption
+      for the concrete KEM.  Specify credential padding if hiding length
+      is an objective.
+
+   *  Specify byte order, complete per-type lengths, transport/session
+      association, duplicate and retransmission handling, and extension
+      or negotiation rules.  Until negotiation is defined, a completed
+      Version 1 profile must use its fixed suite and reject unsupported
+      alternatives.
+
+   *  Link versioned proof artifacts for the public CAKE-HI paper and
+      supply claim-to-model and model-to-specification mappings.
+      Provide reproducible test vectors for successful exchanges, wrong
+      peer identities, modified and replayed messages, malformed inputs,
+      mismatched pre-shared secrets, and failed confirmation.
+
+   These items include cryptographic decisions, not just editorial
+   details.  Completing them may require changes to the reported CAKE-HI
+   models.  The current diagram and message layouts must not be treated
+   as an already validated wire implementation.
+
+8.  IANA Considerations
+
+   None.
+
+9.  References
+
+9.1.  Normative References
+
+   [HKDF]     Krawczyk, H. and P. Eronen, "HMAC-based Extract-and-Expand
+              Key Derivation Function (HKDF)", RFC 5869,
+              DOI 10.17487/RFC5869, May 2010,
+              <https://www.rfc-editor.org/rfc/rfc5869>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
+
+   [X.509]    Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
+              Housley, R., and W. Polk, "Internet X.509 Public Key
+              Infrastructure Certificate and Certificate Revocation List
+              (CRL) Profile", RFC 5280, DOI 10.17487/RFC5280, May 2008,
+              <https://www.rfc-editor.org/rfc/rfc5280>.
+
+9.2.  Informative References
+
+   [BATTARBEE-2025-1228]
+              Battarbee, C., Striecks, C., Perret, L., Ramacher, S., and
+              K. Verhaeghe, "Quantum-Safe Hybrid Key Exchanges with KEM-
+              Based Authentication", IACR ePrint 2025/1228, EPJ Quantum
+              Technology 12, article 128,
+              DOI 10.1140/epjqt/s40507-025-00425-3, 2025,
+              <https://doi.org/10.1140/epjqt/s40507-025-00425-3>.
+
+   [BJM-KA]   Blake-Wilson, S., Johnson, D., and A. Menezes, "Key
+              Agreement Protocols and Their Security Analysis",
+              DOI 10.1007/BFb0024447, December 1997,
+              <https://doi.org/10.1007/BFb0024447>.
+
+   [CAKE-HI]  Blumenthal, U., Itkis, G., Khazan, R., Luo, B., O'Melia,
+              S., Proulx, B., Stott, D., Torres, G., and D. A. Wilson,
+              "CAKE-HI - Compact Authenticated Key Exchange Hiding
+              Identities", IACR ePrint 2026/1749, August 2026,
+              <https://eprint.iacr.org/2026/1749>.
+
+   [CFRG-PROCESS]
+              Crypto Forum Research Group, "Crypto Forum Research Group
+              Process", n.d.,
+              <https://wiki.ietf.org/group/cfrg/CFRG-Process>.
+
+   [CKAKE]    Arapinis, M., Battarbee, C., and M. Doosti, "Have Your
+              CKAKE and Eat it, Too: Efficient, Composable KEM-
+              Authenticated Key Exchange", IACR ePrint 2026/249, 2026,
+              <https://eprint.iacr.org/2026/249>.
+
+   [CRYPTOVERIF-PQ]
+              Blanchet, B. and C. Jacomme, "Post-quantum sound
+              CryptoVerif and verification of hybrid TLS and SSH key-
+              exchanges", CSF 2024, July 2024,
+              <https://bblanche.gitlabpages.inria.fr/publications/
+              BlanchetJacommeCSF24.html>.
+
+   [EAP]      Aboba, B., Simon, D., and P. Eronen, "Extensible
+              Authentication Protocol (EAP) Key Management Framework",
+              RFC 5247, DOI 10.17487/RFC5247, August 2008,
+              <https://www.rfc-editor.org/rfc/rfc5247>.
+
+   [EDHOC]    Selander, G., Preuß Mattsson, J., and F. Palombini,
+              "Ephemeral Diffie-Hellman Over COSE (EDHOC)", RFC 9528,
+              DOI 10.17487/RFC9528, March 2024,
+              <https://www.rfc-editor.org/rfc/rfc9528>.
+
+   [FIPS203]  National Institute of Standards and Technology, "Module-
+              Lattice-Based Key-Encapsulation Mechanism Standard",
+              FIPS 203, August 2024,
+              <https://csrc.nist.gov/pubs/fips/203/final>.
+
+   [FIPS204]  National Institute of Standards and Technology, "Module-
+              Lattice-Based Digital Signature Standard", FIPS 204,
+              August 2024, <https://csrc.nist.gov/pubs/fips/204/final>.
+
+   [HMQV]     Krawczyk, H., "HMQV: A High-Performance Secure Diffie-
+              Hellman Protocol", CRYPTO 2005, IACR ePrint 2005/176,
+              2005, <https://eprint.iacr.org/2005/176>.
+
+   [I-D.celi-wiggers-tls-authkem]
+              Wiggers, T., Celi, S., Schwabe, P., Stebila, D., and N.
+              Sullivan, "KEM-based Authentication for TLS 1.3", Work in
+              Progress, Internet-Draft, draft-celi-wiggers-tls-authkem-
+              07, 4 May 2026, <https://datatracker.ietf.org/doc/html/
+              draft-celi-wiggers-tls-authkem-07>.
+
+   [I-D.ietf-lake-authkem-edhoc]
+              Pocero Fraile, L., Koulamas, C., Fournaris, A. P., and E.
+              Haleplidis, "KEM-based Authentication for EDHOC", Work in
+              Progress, Internet-Draft, draft-ietf-lake-authkem-edhoc-
+              01, 28 September 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-lake-
+              authkem-edhoc-01>.
+
+   [I-D.sfluhrer-cfrg-ml-kem-security-considerations]
+              Fluhrer, S., Dang, Q., Mattsson, J. P., Milner, K., and D.
+              Shiu, "ML-KEM Security Considerations", Work in Progress,
+              Internet-Draft, draft-sfluhrer-cfrg-ml-kem-security-
+              considerations-05, 13 May 2026,
+              <https://datatracker.ietf.org/doc/html/draft-sfluhrer-
+              cfrg-ml-kem-security-considerations-05>.
+
+   [I-D.wang-ipsecme-kem-auth-ikev2]
+              Wang, G. and V. Smyslov, "KEM-based Authentication for
+              IKEv2 with Post-quantum Security", Work in Progress,
+              Internet-Draft, draft-wang-ipsecme-kem-auth-ikev2-04, 3
+              July 2026, <https://datatracker.ietf.org/doc/html/draft-
+              wang-ipsecme-kem-auth-ikev2-04>.
+
+   [IKEV2]    Kaufman, C., Hoffman, P., Nir, Y., Eronen, P., and T.
+              Kivinen, "Internet Key Exchange Protocol Version 2
+              (IKEv2)", STD 79, RFC 7296, DOI 10.17487/RFC7296, October
+              2014, <https://www.rfc-editor.org/rfc/rfc7296>.
+
+   [KEMTLS]   Schwabe, P., Stebila, D., and T. Wiggers, "Post-Quantum
+              TLS without Handshake Signatures", ACM CCS 2020, IACR
+              ePrint 2020/534, 2020, <https://ia.cr/2020/534>.
+
+   [KEMTLS-PDK]
+              Schwabe, P., Stebila, D., and T. Wiggers, "More efficient
+              post-quantum KEMTLS with pre-distributed public keys",
+              ESORICS 2021, IACR ePrint 2021/779, 2021,
+              <https://ia.cr/2021/779>.
+
+   [KEMTLS-TAMARIN]
+              Celi, S., Hoyland, J., Stebila, D., and T. Wiggers, "A
+              tale of two models: formal verification of KEMTLS via
+              Tamarin", ESORICS 2022, IACR ePrint 2022/1111, 2022,
+              <https://ia.cr/2022/1111>.
+
+   [KYBER-ANONYMITY]
+              Maram, V. and K. Xagawa, "Post-Quantum Anonymity of
+              Kyber", PKC 2023, DOI 10.1007/978-3-031-31368-4_1, 2023,
+              <https://eprint.iacr.org/2022/1696>.
+
+   [LAKE-CFRG-REQUEST]
+              Navas, R., "Request for standardized lightweight quantum-
+              resistant key exchange (on behalf LAKE WG)", 13 September
+              2026, <https://mailarchive.ietf.org/arch/msg/lake/
+              BYZ5nAzAmeHCoRo-91_U5e5TL0w/>.
+
+   [LAKE-CHARTER]
+              Internet Engineering Task Force, "Lightweight
+              Authenticated Key Exchange (LAKE) Working Group Charter",
+              n.d.,
+              <https://datatracker.ietf.org/doc/charter-ietf-lake/>.
+
+   [MQV]      Law, L., Menezes, A., Qu, M., Solinas, J., and S.
+              Vanstone, "An Efficient Protocol for Authenticated Key
+              Agreement", DOI 10.1023/A:1022595222606, March 2003,
+              <https://doi.org/10.1023/A:1022595222606>.
+
+   [NIST-SP-800-227]
+              National Institute of Standards and Technology,
+              "Recommendations for Key-Encapsulation Mechanisms", NIST
+              SP 800-227, DOI 10.6028/NIST.SP.800-227, September 2025,
+              <https://csrc.nist.gov/pubs/sp/800/227/final>.
+
+   [RFC9370]  Tjhai, CJ., Tomlinson, M., Bartlett, G., Fluhrer, S., Van
+              Geest, D., Garcia-Morchon, O., and V. Smyslov, "Multiple
+              Key Exchanges in the Internet Key Exchange Protocol
+              Version 2 (IKEv2)", RFC 9370, DOI 10.17487/RFC9370, May
+              2023, <https://www.rfc-editor.org/rfc/rfc9370>.
+
+Acknowledgments
+
+   The authors want to thank Roger Khazan (MIT/LL), Adam Margetts (MIT/
+   LL) for reviewing this work and giving helpful suggestions.  The
+   authors also thank Guilin Wang for comments on the design rationale,
+   related work, security explanations, and integration scope, and John
+   Preuß Mattsson and Nick Sullivan for comments on the scope,
+   applicability, and review process.
+
+Authors' Addresses
+
+   Uri Blumenthal
+   MIT
+   United States of America
+   Email: uri@ll.mit.edu
+
+
+   Brandon Luo
+   MIT
+   United States of America
+   Email: brandon.luo@ll.mit.edu
+
+
+   Sean O'Melia
+   MIT
+   United States of America
+   Email: sean.omelia@ll.mit.edu
+
+
+   Gabriel Torres
+   MIT
+   United States of America
+   Email: gabriel.torres@ll.mit.edu
+
+
+   David A. Wilson
+   MIT
+   United States of America
+   Email: david.wilson@ll.mit.edu
