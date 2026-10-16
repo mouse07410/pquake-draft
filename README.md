@@ -1,4 +1,4 @@
-<!-- regenerate: on (set to off if you edit this file) -->
+<!-- regenerate: off (set to off if you edit this file) -->
 
 # PQuAKE - Post-Quantum Authenticated Key Exchange
 
@@ -26,6 +26,27 @@ Formatted text and HTML versions of the draft can be built using `make`.
 ```sh
 $ make
 ```
+
+Use `make next` to generate the next numbered submission preview as HTML,
+XML, and plain text under `versioned/`. The revision is one greater than
+the latest local release tag; repeated builds keep the same number until
+another release is tagged. Existing output files do not advance it.
+The local tag `draft-uri-cfrg-pquake-00` identifies commit `f8f20c2`, whose
+archived editor's copy matches the submitted `-00` text, so the next preview
+is `draft-uri-cfrg-pquake-01`.
+
+Release tags must be available in the checkout for revision numbering.
+CI fetches full history and tags. Pushing a `draft-*` tag triggers the
+Datatracker submission workflow; restoring a historical tag locally does
+not submit the draft.
+
+The Makefile sets `DEFAULT_BRANCH=main` so the Pages publishing target puts
+the editor's copy at the site root, including
+[the HTML draft](https://mouse07410.github.io/pquake-draft/draft-uri-cfrg-pquake.html).
+Other branches are published in preview subdirectories. This build setting
+is separate from the Pages source branch, `gh-pages`, which stores generated
+output. Changes reach the public site after the `Update Editor's Copy`
+workflow and the subsequent Pages deployment succeed.
 
 Command line usage requires that you have the necessary software installed.  See
 [the instructions](https://github.com/martinthomson/i-d-template/blob/main/doc/SETUP.md).

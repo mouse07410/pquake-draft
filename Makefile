@@ -1,5 +1,11 @@
 LIBDIR := lib
 
+# Publish the main editor's copy at the Pages site root. The repository's
+# GitHub default branch can be gh-pages, which stores generated output;
+# relying on that setting would publish main only under the /main/ preview.
+# Keep this overridable for alternate deployments and template tests.
+DEFAULT_BRANCH ?= main
+
 # All toolchain self-heal logic below applies only to local (non-CI) builds.
 # In CI the i-d-template Docker image installs everything globally and there
 # is no lib/.venv to manage. We guard the additions accordingly so CI is
@@ -50,6 +56,11 @@ DEPS_FILES = .kramdown-rfc.dep $(VENVDIR)/bin/xml2rfc
 endif # !CI
 
 include $(LIBDIR)/main.mk
+
+# Include numbered HTML in submission previews, alongside the template's
+# numbered TXT and XML. Use the same tag-derived revision for every format;
+# rebuilding a preview must not advance the submission revision.
+next:: $(addprefix $(VERSIONED)/,$(addsuffix .html,$(drafts_next)))
 
 ifneq (true,$(CI))
 

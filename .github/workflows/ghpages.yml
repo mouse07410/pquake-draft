@@ -23,6 +23,9 @@ jobs:
     steps:
     - name: "Checkout"
       uses: actions/checkout@v4
+      with:
+        # Revision numbering depends on release tags and their source history.
+        fetch-depth: 0
 
     - name: "Setup"
       id: setup
