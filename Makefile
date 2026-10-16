@@ -1,3 +1,15 @@
+# The external template defines publish as an alias for a direct upload.
+# Handle our tag-push entry point before loading it, without converter setup.
+# Requiring a standalone goal also prevents mixed-goal prerequisite surprises.
+ifneq (,$(filter publish,$(MAKECMDGOALS)))
+ifneq (publish,$(strip $(MAKECMDGOALS)))
+$(error Run make publish on its own; build or prepare the release separately)
+endif
+.PHONY: publish
+publish:
+	+@$(SHELL) scripts/release.sh publish "$(MAKE)"
+else
+
 LIBDIR := lib
 
 # Publish the main editor's copy at the Pages site root. The repository's
@@ -62,6 +74,17 @@ include $(LIBDIR)/main.mk
 # rebuilding a preview must not advance the submission revision.
 next:: $(addprefix $(VERSIONED)/,$(addsuffix .html,$(drafts_next)))
 
+# Release preparation validates the committed draft before recording a local
+# annotated tag. Publication is a separate, explicit push of that exact tag.
+# The helper inherits command-line make variables through recursive make.
+.PHONY: release test-release
+release:
+	+@$(SHELL) scripts/release.sh release "$(MAKE)"
+
+# Exercise release failures and tag publication in disposable local Git repos.
+test-release:
+	@$(SHELL) tests/test-release.sh
+
 ifneq (true,$(CI))
 
 # Put the user-local gem bin directory on PATH so an already-installed
@@ -123,3 +146,4 @@ endif
 
 export UPLOAD_EMAIL ?= uri@ll.mit.edu
 
+endif # standalone publish versus template-backed build targets
